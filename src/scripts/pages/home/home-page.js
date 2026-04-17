@@ -1,13 +1,23 @@
-export default class HomePage {
+import HomeView from './home-view'; 
+
+class HomePage {
+  constructor() {
+    this.view = new HomeView();
+  }
+
   async render() {
-    return `
-      <section class="container">
-        <h1>Home Page</h1>
-      </section>
-    `;
+    return this.view.getTemplate(); 
   }
 
   async afterRender() {
-    // Do your job here
+    // Data dummy sementara sebelum menghubungkan API di Kriteria 2
+    const dummyStories = [
+      { name: 'Cerita Dummy 1', description: 'Ini adalah deskripsi cerita 1...' },
+      { name: 'Cerita Dummy 2', description: 'Ini adalah deskripsi cerita 2...' }
+    ];
+
+    this.view.showStories(dummyStories); 
   }
 }
+
+export default HomePage;
