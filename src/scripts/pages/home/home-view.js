@@ -2,6 +2,8 @@ class HomeView {
   getTemplate() {
     return `
       <section class="home-layout">
+        <button id="fabAddStory" class="fab-btn" aria-label="Tambah Cerita Baru">➕ Tambah Cerita</button>
+        
         <div class="map-section">
           <h2>Peta Lokasi Cerita</h2>
           <div id="mapContainer" class="map-container"></div>
@@ -13,6 +15,53 @@ class HomeView {
           </div>
         </div>
       </section>
+
+      <div id="addStoryModal" class="modal-overlay hidden">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3>Bagikan Cerita Baru</h3>
+            <button id="closeModalBtn" class="close-btn" aria-label="Tutup">&times;</button>
+          </div>
+          <form id="addStoryForm">
+            <div class="form-group">
+              <label for="descInput">Deskripsi Singkat</label>
+              <textarea id="descInput" required rows="3" placeholder="Ceritakan pengalamanmu..."></textarea>
+            </div>
+
+            <div class="media-container">
+              <div class="media-box">
+                <label>Pilih dari Galeri</label>
+                <input type="file" id="fileInput" accept="image/*">
+              </div>
+              <div class="media-box">
+                <label>Atau Ambil Kamera</label>
+                <div class="camera-wrapper">
+                  <video id="cameraVideo" autoplay playsinline></video>
+                  <button type="button" id="captureBtn">Jepret Foto</button>
+                </div>
+              </div>
+            </div>
+            
+            <div class="preview-box">
+              <p>Pratinjau Foto:</p>
+              <img id="imagePreview" alt="Pratinjau" class="hidden">
+              <canvas id="canvas" class="hidden" width="320" height="240"></canvas>
+            </div>
+
+            <div class="form-group">
+              <label>Pilih Titik Lokasi Peta (Klik Peta)</label>
+              <div id="modalMap" class="modal-map-container"></div>
+              <div class="coord-inputs">
+                <input type="text" id="inputLat" readonly placeholder="Latitude">
+                <input type="text" id="inputLon" readonly placeholder="Longitude">
+              </div>
+            </div>
+
+            <p id="modalFeedback" class="feedback-msg"></p>
+            <button type="submit" id="btnSubmitStory" class="submit-btn">Kirim Cerita</button>
+          </form>
+        </div>
+      </div>
     `;
   }
 

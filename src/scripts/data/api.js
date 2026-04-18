@@ -44,6 +44,31 @@ class StoryApi {
       return []; 
     }
   }
+
+  static async addStory({ description, photo, lat, lon }) {
+    const data = new FormData();
+    data.append('description', description);
+    data.append('photo', photo);
+    
+    if (lat && lon) {
+      data.append('lat', lat);
+      data.append('lon', lon);
+    }
+
+    try {
+      const response = await fetch(`${BASE_URL}/stories`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${this.getAccessToken()}`,
+        },
+        body: data,
+      });
+      return await response.json();
+    } catch (error) {
+      return { error: true, message: 'Gagal terhubung ke jaringan' };
+    }
+  }
+
 }
 
 export default StoryApi;
