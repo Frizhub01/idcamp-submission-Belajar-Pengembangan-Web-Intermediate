@@ -32,6 +32,12 @@ class StoryApi {
         },
       });
       
+      if (response.status === 401) {
+        localStorage.removeItem('token');
+        window.location.hash = '#/login';
+        throw new Error('Sesi anda telah tamat. Sila log masuk semula.');
+      }
+
       const responseJson = await response.json();
       
       if (!responseJson.error) {
@@ -63,6 +69,12 @@ class StoryApi {
         },
         body: data,
       });
+      if (response.status === 401) {
+        localStorage.removeItem('token');
+        window.location.hash = '#/login';
+        return { error: true, message: 'Sesi anda telah tamat. Sila log masuk semula.' };
+      }
+
       return await response.json();
     } catch (error) {
       return { error: true, message: 'Gagal terhubung ke jaringan' };
