@@ -30,14 +30,14 @@ class HomeView {
 
             <div class="media-container">
               <div class="media-box">
-                <label>Pilih dari Galeri</label>
+                <label for="fileInput">Pilih dari Galeri</label>
                 <input type="file" id="fileInput" accept="image/*">
               </div>
               <div class="media-box">
                 <label>Atau Ambil Kamera</label>
                 <div class="camera-wrapper">
                   <video id="cameraVideo" autoplay playsinline></video>
-                  <button type="button" id="captureBtn">Jepret Foto</button>
+                  <button type="button" id="captureBtn">📸 Jepret Foto</button>
                 </div>
               </div>
             </div>
@@ -46,14 +46,15 @@ class HomeView {
               <p>Pratinjau Foto:</p>
               <img id="imagePreview" alt="Pratinjau" class="hidden">
               <canvas id="canvas" class="hidden" width="320" height="240"></canvas>
+              <button type="button" id="clearPhotoBtn" class="hidden" style="margin-top: 10px; color: red;">❌ Batal / Hapus Foto</button>
             </div>
 
             <div class="form-group">
               <label>Pilih Titik Lokasi Peta (Klik Peta)</label>
               <div id="modalMap" class="modal-map-container"></div>
               <div class="coord-inputs">
-                <input type="text" id="inputLat" readonly placeholder="Latitude">
-                <input type="text" id="inputLon" readonly placeholder="Longitude">
+                <input type="text" id="inputLat" readonly placeholder="Latitude" aria-label="Latitude">
+                <input type="text" id="inputLon" readonly placeholder="Longitude" aria-label="Longitude">
               </div>
             </div>
 
@@ -66,23 +67,21 @@ class HomeView {
   }
 
   showStories(stories) {
-    const container = document.getElementById('storiesContainer');
-    const countLabel = document.getElementById('storyCount');
-    
-    container.innerHTML = '';
+    const container = document.getElementById("storiesContainer");
+    const countLabel = document.getElementById("storyCount");
+
+    container.innerHTML = "";
     countLabel.innerText = stories.length;
 
     if (stories.length === 0) {
-      container.innerHTML = '<p>Tidak ada cerita di area ini.</p>';
+      container.innerHTML = "<p>Tidak ada cerita di area ini.</p>";
       return;
     }
-    
-    stories.forEach(story => {
-      const shortDesc = story.description.length > 80 
-        ? story.description.substring(0, 80) + '...' 
-        : story.description;
-      
-      const date = new Date(story.createdAt).toLocaleDateString('id-ID');
+
+    stories.forEach((story) => {
+      const shortDesc = story.description.length > 80 ? story.description.substring(0, 80) + "..." : story.description;
+
+      const date = new Date(story.createdAt).toLocaleDateString("id-ID");
 
       container.innerHTML += `
         <div class="story-card" id="story-${story.id}">

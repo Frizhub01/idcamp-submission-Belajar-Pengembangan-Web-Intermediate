@@ -61,6 +61,10 @@ class HomePage {
   }
 
   async loadData() {
+    // 1. Hapus semua marker lama dari peta sebelum memuat yang baru
+    this.markers.forEach((item) => this.map.removeLayer(item.marker));
+    this.markers = []; 
+
     this.allStories = await StoryApi.getStoriesWithLocation();
 
     this.allStories.forEach((story) => {
@@ -87,54 +91,78 @@ class HomePage {
   }
 
   initAddStoryModal() {
-    const modal = document.getElementById('addStoryModal');
-    const fabBtn = document.getElementById('fabAddStory');
-    const closeBtn = document.getElementById('closeModalBtn');
-    const form = document.getElementById('addStoryForm');
-    
-    // Media Elements
-    const fileInput = document.getElementById('fileInput');
-    const video = document.getElementById('cameraVideo');
-    const canvas = document.getElementById('canvas');
-    const captureBtn = document.getElementById('captureBtn');
-    const preview = document.getElementById('imagePreview');
+  const modal = document.getElementById("addStoryModal");
+  const fabBtn = document.getElementById("fabAddStory");
+  const closeBtn = document.getElementById("closeModalBtn");
+  const form = document.getElementById("addStoryForm");
+  
+  const fileInput = document.getElementById("fileInput");
+  const video = document.getElementById("cameraVideo");
+  const canvas = document.getElementById("canvas");
+  const captureBtn = document.getElementById("captureBtn");
+  const preview = document.getElementById("imagePreview");
+  const clearPhotoBtn = document.getElementById("clearPhotoBtn");
+  const mediaContainer = document.querySelector(".media-container"); // Ambil kontainer media
 
-    // Buka Modal
-    fabBtn.addEventListener('click', () => {
-      modal.classList.remove('hidden');
-      this.setupModalMap();
-      this.startCamera(video);
-    });
-
-    // Tutup Modal
-    closeBtn.addEventListener('click', () => this.closeModal());
-
-    // Input File Galeri
-    fileInput.addEventListener('change', (e) => {
-      const file = e.target.files[0];
-      if (file) {
-        this.selectedPhotoFile = file;
-        preview.src = URL.createObjectURL(file);
-        preview.classList.remove('hidden');
-      }
-    });
-
-    // Jepret Kamera
-    captureBtn.addEventListener('click', () => {
-      const context = canvas.getContext('2d');
-      context.drawImage(video, 0, 0, canvas.width, canvas.height);
-      
-      // Tampilkan di Pratinjau
-      preview.src = canvas.toDataURL('image/jpeg');
+  // Fungsi pembantu untuk mengatur tampilan pratinjau
+  const setPreviewState = (show) => {
+    if (show) {
+      mediaContainer.classList.add('hidden'); // Sembunyikan input kamera/file
       preview.classList.remove('hidden');
+      clearPhotoBtn.classList.remove('hidden');
+    } else {
+      mediaContainer.classList.remove('hidden'); // Munculkan kembali input
+      preview.classList.add('hidden');
+      canvas.classList.add('hidden'); // Pastikan canvas ikut sembunyi
+      clearPhotoBtn.classList.add('hidden');
+      
+      // Reset data
+      this.selectedPhotoFile = null;
+      fileInput.value = '';
+      preview.src = '';
+    }
+  };
 
-      // Ubah canvas menjadi tipe File untuk dikirim ke API
-      canvas.toBlob((blob) => {
-        this.selectedPhotoFile = new File([blob], "camera-capture.jpg", { type: "image/jpeg" });
-      }, 'image/jpeg');
+  fabBtn.addEventListener('click', () => {
+    modal.classList.remove('hidden');
+    this.setupModalMap();
+    this.startCamera(video);
+    setTimeout(() => document.getElementById('descInput').focus(), 100);
+  });
+
+  closeBtn.addEventListener('click', () => this.closeModal());
+
+  fileInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      this.selectedPhotoFile = file;
+      preview.src = URL.createObjectURL(file);
+      setPreviewState(true);
+    }
+  });
+
+  captureBtn.addEventListener('click', () => {
+    const context = canvas.getContext('2d');
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+    
+    preview.src = canvas.toDataURL('image/jpeg');
+    setPreviewState(true);
+
+    canvas.toBlob((blob) => {
+      this.selectedPhotoFile = new File([blob], "capture.jpg", { type: "image/jpeg" });
+    }, 'image/jpeg');
+  });
+  
+    // Tombol Batal / Hapus Foto
+    clearPhotoBtn.addEventListener('click', () => {
+      this.selectedPhotoFile = null;
+      fileInput.value = '';
+      preview.src = '';
+      preview.classList.add('hidden');
+      clearPhotoBtn.classList.add('hidden');
     });
 
-    // Submit Form
+    // Submit Form (Logikanya tetap sama seperti buatanmu sebelumnya)
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       const feedback = document.getElementById('modalFeedback');
@@ -166,7 +194,9 @@ class HomePage {
           this.loadData();
           form.reset();
           preview.classList.add('hidden');
+          clearPhotoBtn.classList.add('hidden'); // Sembunyikan juga tombol batal
           this.selectedPhotoFile = null;
+          feedback.innerText = '';
         }, 1500);
       } else {
         feedback.style.color = 'red';
@@ -177,14 +207,14 @@ class HomePage {
 
   setupModalMap() {
     if (!this.modalMap) {
-      this.modalMap = L.map('modalMap').setView([-2.5489, 118.0149], 5);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(this.modalMap);
-      
-      this.modalMap.on('click', (e) => {
+      this.modalMap = L.map("modalMap").setView([-2.5489, 118.0149], 5);
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(this.modalMap);
+
+      this.modalMap.on("click", (e) => {
         const lat = e.latlng.lat;
         const lon = e.latlng.lng;
-        document.getElementById('inputLat').value = lat;
-        document.getElementById('inputLon').value = lon;
+        document.getElementById("inputLat").value = lat;
+        document.getElementById("inputLon").value = lon;
 
         if (this.modalMarker) {
           this.modalMarker.setLatLng([lat, lon]);
@@ -203,26 +233,27 @@ class HomePage {
         (position) => {
           const userLat = position.coords.latitude;
           const userLon = position.coords.longitude;
-          
+
           this.modalMap.setView([userLat, userLon], 13);
-          
+
           if (this.modalMarker) {
             this.modalMarker.setLatLng([userLat, userLon]);
           } else {
             this.modalMarker = L.marker([userLat, userLon]).addTo(this.modalMap);
           }
-          
-          document.getElementById('inputLat').value = userLat;
-          document.getElementById('inputLon').value = userLon;
+
+          document.getElementById("inputLat").value = userLat;
+          document.getElementById("inputLon").value = userLon;
         },
-        (error) => console.log("Akses GPS ditolak/gagal", error)
+        (error) => console.log("Akses GPS ditolak/gagal", error),
       );
     }
   }
 
   startCamera(videoElement) {
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-      navigator.mediaDevices.getUserMedia({ video: true })
+      navigator.mediaDevices
+        .getUserMedia({ video: true })
         .then((stream) => {
           this.cameraStream = stream;
           videoElement.srcObject = stream;
@@ -234,10 +265,10 @@ class HomePage {
   }
 
   closeModal() {
-    document.getElementById('addStoryModal').classList.add('hidden');
-    
+    document.getElementById("addStoryModal").classList.add("hidden");
+
     if (this.cameraStream) {
-      this.cameraStream.getTracks().forEach(track => track.stop());
+      this.cameraStream.getTracks().forEach((track) => track.stop());
       this.cameraStream = null;
     }
   }

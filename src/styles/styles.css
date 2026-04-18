@@ -2,14 +2,14 @@
    Variabel Global & Skema Warna
    ========================================= */
 :root {
-  --bg-color: #F1F0E8;       
-  --primary-color: #89A8B2;  
-  --secondary-color: #B3C8CF;
-  --accent-color: #E5E1DA;   
-  --text-main: #2C3E50;      
-  --text-muted: #596A7A;
-  --surface-white: #FFFFFF;
-  
+  --bg-color: #f1f0e8;
+  --primary-color: #89a8b2;
+  --secondary-color: #b3c8cf;
+  --accent-color: #e5e1da;
+  --text-main: #2c3e50;
+  --text-muted: #596a7a;
+  --surface-white: #ffffff;
+
   /* Bayangan disesuaikan dengan warna primary (#89A8B2 -> rgb(137, 168, 178)) */
   --shadow-sm: 0 4px 6px rgba(137, 168, 178, 0.15);
   --shadow-md: 0 8px 15px rgba(137, 168, 178, 0.25);
@@ -521,28 +521,30 @@ textarea:focus {
    View Transition Animasi Smooth
    ========================================= */
 ::view-transition-old(root) {
-  animation: fade-out var(--transition-speed) ease-out forwards;
+  animation: 300ms cubic-bezier(0.4, 0, 1, 1) both fade-out-scale;
 }
 
 ::view-transition-new(root) {
-  animation: fade-in var(--transition-speed) ease-in forwards;
+  animation: 300ms cubic-bezier(0, 0, 0.2, 1) both fade-in-scale;
 }
 
-@keyframes fade-out {
+/* Animasi halaman keluar (mengecil dan memudar) */
+@keyframes fade-out-scale {
   from {
     opacity: 1;
     transform: scale(1);
   }
   to {
     opacity: 0;
-    transform: scale(0.98);
+    transform: scale(0.95);
   }
 }
 
-@keyframes fade-in {
+/* Animasi halaman masuk (membesar dan muncul) */
+@keyframes fade-in-scale {
   from {
     opacity: 0;
-    transform: scale(1.02);
+    transform: scale(1.05);
   }
   to {
     opacity: 1;
