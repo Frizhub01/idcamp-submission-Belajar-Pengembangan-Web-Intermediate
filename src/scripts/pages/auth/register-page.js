@@ -1,3 +1,5 @@
+import StoryApi from '../../data/api';
+
 class RegisterPage {
   async render() {
     return `
@@ -14,9 +16,10 @@ class RegisterPage {
           </div>
           <div class="form-group">
             <label for="password">Password</label>
-            <input type="password" id="password" required>
+            <input type="password" id="password" minlength="8" required>
           </div>
-          <button type="submit">Register</button>
+          <button type="submit" id="btnRegister">Daftar</button>
+          <p id="errorMessage" class="error-message"></p>
         </form>
         <p>Sudah punya akun? <a href="#/login">Login di sini</a></p>
       </section>
@@ -24,7 +27,29 @@ class RegisterPage {
   }
 
   async afterRender() {
-    // Logika form submit akan diatur di sini
+    const form = document.getElementById('registerForm');
+    const errorEl = document.getElementById('errorMessage');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      errorEl.innerText = '';
+
+      const name = document.getElementById('name').value;
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+
+      try {
+        const response = await StoryApi.register({ name, email, password });
+        if (response.error) {
+          errorEl.innerText = response.message;
+        } else {
+          alert('Pendaftaran berhasil! Silakan masuk.');
+          window.location.hash = '#/login';
+        }
+      } catch (err) {
+        errorEl.innerText = 'Terjadi kesalahan jaringan.';
+      }
+    });
   }
 }
 

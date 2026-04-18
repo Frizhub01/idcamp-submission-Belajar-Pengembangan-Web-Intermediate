@@ -34,8 +34,19 @@ class App {
 
   async renderPage() {
     const url = getActiveRoute();
-    const page = routes[url];
+    const token = localStorage.getItem('token');
 
+    if (token && (url === '/login' || url === '/register')) {
+      window.location.hash = '#/home';
+      return;
+    }
+
+    if (!token && (url !== '/login' && url !== '/register')) {
+      window.location.hash = '#/login';
+      return;
+    }
+
+    const page = routes[url];
     if (!page) return;
 
     if (!document.startViewTransition) {

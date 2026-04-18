@@ -1,3 +1,5 @@
+import StoryApi from '../../data/api';
+
 class LoginPage {
   async render() {
     return `
@@ -12,7 +14,8 @@ class LoginPage {
             <label for="password">Password</label>
             <input type="password" id="password" required>
           </div>
-          <button type="submit">Login</button>
+          <button type="submit" id="btnLogin">Masuk</button>
+          <p id="errorMessage" class="error-message"></p>
         </form>
         <p>Belum punya akun? <a href="#/register">Daftar di sini</a></p>
       </section>
@@ -20,7 +23,28 @@ class LoginPage {
   }
 
   async afterRender() {
-    // Logika ketika tombol submit ditekan akan diatur di sini
+    const form = document.getElementById('loginForm');
+    const errorEl = document.getElementById('errorMessage');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      errorEl.innerText = '';
+
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+
+      try {
+        const response = await StoryApi.login({ email, password });
+        if (response.error) {
+          errorEl.innerText = response.message;
+        } else {
+          localStorage.setItem('token', response.loginResult.token);
+          window.location.hash = '#/home';
+        }
+      } catch (err) {
+        errorEl.innerText = 'Gagal terhubung ke server.';
+      }
+    });
   }
 }
 

@@ -144,3 +144,45 @@ header {
   from { opacity: 0; }
   to { opacity: 1; }
 }
+
+/* Layout Default (Mobile First) - Menumpuk */
+.home-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+
+.map-container {
+  height: 400px;
+  width: 100%;
+  border-radius: 8px;
+  z-index: 1;
+}
+
+/* Layout Desktop (Layar Lebar) - Bersebelahan */
+@media screen and (min-width: 768px) {
+  .home-layout {
+    grid-template-columns: 1.5fr 1fr;
+  }
+  
+  .map-container {
+    height: 70vh; 
+  }
+  
+  .stories-list {
+    max-height: 70vh;
+    overflow-y: auto;
+  }
+}
+
+.error-message {
+  color: #dc3545;
+  font-size: 0.875rem;
+  margin-top: 10px;
+  min-height: 1.25rem;
+}
+
+.auth-container form {
+  display: flex;
+  flex-direction: column;
+}
