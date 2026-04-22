@@ -5,6 +5,7 @@ import "leaflet/dist/leaflet.css";
 import icon from "leaflet/dist/images/marker-icon.png";
 import iconShadow from "leaflet/dist/images/marker-shadow.png";
 import iconRetina from "leaflet/dist/images/marker-icon-2x.png";
+import Swal from "sweetalert2"; // Import SweetAlert2
 
 delete L.Icon.Default.prototype._getIconUrl;
 
@@ -37,6 +38,11 @@ class HomePage {
   }
 
   initMap() {
+    // FIX: Cegah error inisialisasi peta ganda saat berpindah halaman
+    if (this.map !== null) {
+      this.map.remove(); 
+    }
+
     this.map = L.map("mapContainer").setView([-2.5489, 118.0149], 5);
 
     const osmLayer = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -61,7 +67,6 @@ class HomePage {
   }
 
   async loadData() {
-    // 1. Hapus semua marker lama dari peta sebelum memuat yang baru
     this.markers.forEach((item) => this.map.removeLayer(item.marker));
     this.markers = []; 
 
@@ -70,9 +75,7 @@ class HomePage {
     this.allStories.forEach((story) => {
       if (story.lat && story.lon) {
         const marker = L.marker([story.lat, story.lon]).addTo(this.map);
-
         marker.bindPopup(`<b>${story.name}</b><br>Tersedia di lokasi ini.`);
-
         this.markers.push({
           marker: marker,
           data: story,
@@ -86,98 +89,98 @@ class HomePage {
   filterStoriesByMapBounds() {
     const bounds = this.map.getBounds();
     const visibleStories = this.markers.filter((item) => bounds.contains(item.marker.getLatLng())).map((item) => item.data);
-
     this.view.showStories(visibleStories);
   }
 
   initAddStoryModal() {
-  const modal = document.getElementById("addStoryModal");
-  const fabBtn = document.getElementById("fabAddStory");
-  const closeBtn = document.getElementById("closeModalBtn");
-  const form = document.getElementById("addStoryForm");
-  
-  const fileInput = document.getElementById("fileInput");
-  const video = document.getElementById("cameraVideo");
-  const canvas = document.getElementById("canvas");
-  const captureBtn = document.getElementById("captureBtn");
-  const preview = document.getElementById("imagePreview");
-  const clearPhotoBtn = document.getElementById("clearPhotoBtn");
-  const mediaContainer = document.querySelector(".media-container"); // Ambil kontainer media
-
-  // Fungsi pembantu untuk mengatur tampilan pratinjau
-  const setPreviewState = (show) => {
-    if (show) {
-      mediaContainer.classList.add('hidden'); // Sembunyikan input kamera/file
-      preview.classList.remove('hidden');
-      clearPhotoBtn.classList.remove('hidden');
-    } else {
-      mediaContainer.classList.remove('hidden'); // Munculkan kembali input
-      preview.classList.add('hidden');
-      canvas.classList.add('hidden'); // Pastikan canvas ikut sembunyi
-      clearPhotoBtn.classList.add('hidden');
-      
-      // Reset data
-      this.selectedPhotoFile = null;
-      fileInput.value = '';
-      preview.src = '';
-    }
-  };
-
-  fabBtn.addEventListener('click', () => {
-    modal.classList.remove('hidden');
-    this.setupModalMap();
-    this.startCamera(video);
-    setTimeout(() => document.getElementById('descInput').focus(), 100);
-  });
-
-  closeBtn.addEventListener('click', () => this.closeModal());
-
-  fileInput.addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      this.selectedPhotoFile = file;
-      preview.src = URL.createObjectURL(file);
-      setPreviewState(true);
-    }
-  });
-
-  captureBtn.addEventListener('click', () => {
-    const context = canvas.getContext('2d');
-    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+    const modal = document.getElementById("addStoryModal");
+    const fabBtn = document.getElementById("fabAddStory");
+    const closeBtn = document.getElementById("closeModalBtn");
+    const form = document.getElementById("addStoryForm");
     
-    preview.src = canvas.toDataURL('image/jpeg');
-    setPreviewState(true);
+    const fileInput = document.getElementById("fileInput");
+    const video = document.getElementById("cameraVideo");
+    const canvas = document.getElementById("canvas");
+    const captureBtn = document.getElementById("captureBtn");
+    const preview = document.getElementById("imagePreview");
+    const clearPhotoBtn = document.getElementById("clearPhotoBtn");
+    const mediaContainer = document.querySelector(".media-container"); 
 
-    canvas.toBlob((blob) => {
-      this.selectedPhotoFile = new File([blob], "capture.jpg", { type: "image/jpeg" });
-    }, 'image/jpeg');
-  });
-  
-    // Tombol Batal / Hapus Foto
-    clearPhotoBtn.addEventListener('click', () => {
-      this.selectedPhotoFile = null;
-      fileInput.value = '';
-      preview.src = '';
-      preview.classList.add('hidden');
-      clearPhotoBtn.classList.add('hidden');
+    // FIX: Logika Tampilan Preview agar tidak ganda
+    const setPreviewState = (show) => {
+      if (show) {
+        mediaContainer.classList.add('hidden'); 
+        canvas.classList.add('hidden'); // <-- Wajib disembunyikan agar tidak double dengan preview
+        preview.classList.remove('hidden');
+        clearPhotoBtn.classList.remove('hidden');
+      } else {
+        mediaContainer.classList.remove('hidden'); 
+        preview.classList.add('hidden');
+        canvas.classList.add('hidden'); 
+        clearPhotoBtn.classList.add('hidden');
+        
+        this.selectedPhotoFile = null;
+        fileInput.value = '';
+        preview.src = '';
+      }
+    };
+
+    fabBtn.addEventListener('click', () => {
+      modal.classList.remove('hidden');
+      setPreviewState(false); // Pastikan state bersih saat modal dibuka
+      this.setupModalMap();
+      this.startCamera(video);
+      setTimeout(() => document.getElementById('descInput').focus(), 100);
     });
 
-    // Submit Form (Logikanya tetap sama seperti buatanmu sebelumnya)
+    closeBtn.addEventListener('click', () => this.closeModal());
+
+    fileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        this.selectedPhotoFile = file;
+        preview.src = URL.createObjectURL(file);
+        setPreviewState(true);
+      }
+    });
+
+    captureBtn.addEventListener('click', () => {
+      const context = canvas.getContext('2d');
+      // Set dimensi canvas menyamai video sebelum menggambar
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+      
+      preview.src = canvas.toDataURL('image/jpeg');
+      setPreviewState(true);
+
+      canvas.toBlob((blob) => {
+        this.selectedPhotoFile = new File([blob], "capture.jpg", { type: "image/jpeg" });
+      }, 'image/jpeg');
+    });
+    
+    clearPhotoBtn.addEventListener('click', () => {
+      setPreviewState(false);
+    });
+
+    // FIX: Implementasi SweetAlert pada Form Submit
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const feedback = document.getElementById('modalFeedback');
       const desc = document.getElementById('descInput').value;
       const lat = document.getElementById('inputLat').value;
       const lon = document.getElementById('inputLon').value;
 
       if (!this.selectedPhotoFile) {
-        feedback.style.color = 'red';
-        feedback.innerText = 'Harap pilih gambar dari galeri atau kamera!';
+        Swal.fire({ icon: 'warning', title: 'Oops...', text: 'Harap pilih gambar dari galeri atau kamera!' });
         return;
       }
 
-      feedback.style.color = 'blue';
-      feedback.innerText = 'Sedang mengirim data...';
+      Swal.fire({
+        title: 'Mengunggah Cerita...',
+        text: 'Mohon tunggu sebentar',
+        allowOutsideClick: false,
+        didOpen: () => Swal.showLoading()
+      });
 
       const response = await StoryApi.addStory({ 
         description: desc, 
@@ -187,42 +190,44 @@ class HomePage {
       });
 
       if (!response.error) {
-        feedback.style.color = 'green';
-        feedback.innerText = 'Cerita berhasil ditambahkan!';
-        setTimeout(() => {
+        Swal.fire({
+          icon: 'success',
+          title: 'Berhasil!',
+          text: 'Cerita berhasil ditambahkan!',
+          timer: 1500,
+          showConfirmButton: false
+        }).then(() => {
           this.closeModal();
           this.loadData();
           form.reset();
-          preview.classList.add('hidden');
-          clearPhotoBtn.classList.add('hidden'); // Sembunyikan juga tombol batal
-          this.selectedPhotoFile = null;
-          feedback.innerText = '';
-        }, 1500);
+          setPreviewState(false);
+        });
       } else {
-        feedback.style.color = 'red';
-        feedback.innerText = response.message;
+        Swal.fire({ icon: 'error', title: 'Gagal Mengunggah', text: response.message });
       }
     });
   }
 
   setupModalMap() {
-    if (!this.modalMap) {
-      this.modalMap = L.map("modalMap").setView([-2.5489, 118.0149], 5);
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(this.modalMap);
-
-      this.modalMap.on("click", (e) => {
-        const lat = e.latlng.lat;
-        const lon = e.latlng.lng;
-        document.getElementById("inputLat").value = lat;
-        document.getElementById("inputLon").value = lon;
-
-        if (this.modalMarker) {
-          this.modalMarker.setLatLng([lat, lon]);
-        } else {
-          this.modalMarker = L.marker([lat, lon]).addTo(this.modalMap);
-        }
-      });
+    if (this.modalMap !== null) {
+      this.modalMap.remove(); // Bersihkan instance map modal sebelumnya
     }
+
+    this.modalMap = L.map("modalMap").setView([-2.5489, 118.0149], 5);
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(this.modalMap);
+
+    this.modalMap.on("click", (e) => {
+      const lat = e.latlng.lat;
+      const lon = e.latlng.lng;
+      document.getElementById("inputLat").value = lat;
+      document.getElementById("inputLon").value = lon;
+
+      if (this.modalMarker) {
+        this.modalMarker.setLatLng([lat, lon]);
+      } else {
+        this.modalMarker = L.marker([lat, lon]).addTo(this.modalMap);
+      }
+    });
 
     setTimeout(() => {
       this.modalMap.invalidateSize();
@@ -260,13 +265,15 @@ class HomePage {
         })
         .catch((err) => {
           console.error("Kamera gagal diakses: ", err);
+          Swal.fire({ icon: 'error', title: 'Kamera Gagal', text: 'Pastikan Anda telah memberikan izin akses kamera.' });
         });
     }
   }
 
   closeModal() {
     document.getElementById("addStoryModal").classList.add("hidden");
-
+    
+    // Matikan stream kamera untuk menghemat memori
     if (this.cameraStream) {
       this.cameraStream.getTracks().forEach((track) => track.stop());
       this.cameraStream = null;

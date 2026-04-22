@@ -1,4 +1,5 @@
 import StoryApi from '../../data/api';
+import Swal from 'sweetalert2'; // Tambahkan import SweetAlert2
 
 class LoginPage {
   async render() {
@@ -15,7 +16,6 @@ class LoginPage {
             <input type="password" id="password" required>
           </div>
           <button type="submit" id="btnLogin">Masuk</button>
-          <p id="errorMessage" class="error-message"></p>
         </form>
         <p>Belum punya akun? <a href="#/register">Daftar di sini</a></p>
       </section>
@@ -24,25 +24,38 @@ class LoginPage {
 
   async afterRender() {
     const form = document.getElementById('loginForm');
-    const errorEl = document.getElementById('errorMessage');
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      errorEl.innerText = '';
 
       const email = document.getElementById('email').value;
       const password = document.getElementById('password').value;
 
+      // Tampilkan loading state
+      Swal.fire({
+        title: 'Memproses...',
+        allowOutsideClick: false,
+        didOpen: () => Swal.showLoading()
+      });
+
       try {
         const response = await StoryApi.login({ email, password });
         if (response.error) {
-          errorEl.innerText = response.message;
+          Swal.fire({ icon: 'error', title: 'Gagal Masuk', text: response.message });
         } else {
           localStorage.setItem('token', response.loginResult.token);
-          window.location.hash = '#/home';
+          Swal.fire({
+            icon: 'success',
+            title: 'Berhasil!',
+            text: 'Anda berhasil masuk.',
+            timer: 1500,
+            showConfirmButton: false
+          }).then(() => {
+            window.location.hash = '#/home';
+          });
         }
       } catch (err) {
-        errorEl.innerText = 'Gagal terhubung ke server.';
+        Swal.fire({ icon: 'error', title: 'Oops...', text: 'Gagal terhubung ke server.' });
       }
     });
   }
