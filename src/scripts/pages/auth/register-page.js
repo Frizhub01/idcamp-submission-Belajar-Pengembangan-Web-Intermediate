@@ -1,4 +1,5 @@
-import StoryApi from '../../data/api';
+import StoryApi from "../../data/api";
+import Swal from "sweetalert2";
 
 class RegisterPage {
   async render() {
@@ -27,26 +28,39 @@ class RegisterPage {
   }
 
   async afterRender() {
-    const form = document.getElementById('registerForm');
-    const errorEl = document.getElementById('errorMessage');
+    const form = document.getElementById("registerForm");
+    const errorEl = document.getElementById("errorMessage");
 
-    form.addEventListener('submit', async (e) => {
+    form.addEventListener("submit", async (e) => {
       e.preventDefault();
-      errorEl.innerText = '';
+      errorEl.innerText = "";
 
-      const name = document.getElementById('name').value;
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
+      const name = document.getElementById("name").value;
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
 
       try {
+        Swal.fire({
+          title: 'Memproses...',
+          allowOutsideClick: false,
+          didOpen: () => Swal.showLoading()
+        });
+
         const response = await StoryApi.register({ name, email, password });
         if (response.error) {
+          Swal.close();
           errorEl.innerText = response.message;
         } else {
-          alert('Pendaftaran berhasil! Silakan masuk.');
-          window.location.hash = '#/login';
+          Swal.fire({
+            icon: 'success',
+            title: 'Berhasil!',
+            text: 'Pendaftaran berhasil! Silakan masuk.',
+          }).then(() => {
+            window.location.hash = '#/login';
+          });
         }
       } catch (err) {
+        Swal.close();
         errorEl.innerText = 'Terjadi kesalahan jaringan.';
       }
     });

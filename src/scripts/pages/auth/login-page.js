@@ -1,5 +1,5 @@
 import StoryApi from '../../data/api';
-import Swal from 'sweetalert2'; // Tambahkan import SweetAlert2
+import Swal from 'sweetalert2';
 
 class LoginPage {
   async render() {
@@ -31,7 +31,6 @@ class LoginPage {
       const email = document.getElementById('email').value;
       const password = document.getElementById('password').value;
 
-      // Tampilkan loading state
       Swal.fire({
         title: 'Memproses...',
         allowOutsideClick: false,

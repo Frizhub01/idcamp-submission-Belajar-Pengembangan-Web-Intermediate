@@ -551,3 +551,25 @@ textarea:focus {
     transform: scale(1);
   }
 }
+
+/* Membatasi resize textarea hanya ke arah vertikal */
+textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+/* Styling untuk teks indikator batas karakter */
+.char-counter {
+  display: block;
+  text-align: right;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-top: 6px;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+/* Warna berubah menjadi merah jika mencapai batas */
+.char-counter.limit-reached {
+  color: #e74c3c; 
+}

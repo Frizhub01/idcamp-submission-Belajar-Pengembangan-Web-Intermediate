@@ -25,7 +25,8 @@ class HomeView {
           <form id="addStoryForm">
             <div class="form-group">
               <label for="descInput">Deskripsi Singkat</label>
-              <textarea id="descInput" required rows="3" placeholder="Ceritakan pengalamanmu..."></textarea>
+              <textarea id="descInput" maxlength="500" placeholder="Tuliskan cerita singkatmu..."></textarea>
+              <small id="charCounter" class="char-counter">0 / 500 karakter</small>
             </div>
 
             <div class="media-container">

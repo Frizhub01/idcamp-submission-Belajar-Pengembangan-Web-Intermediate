@@ -7,7 +7,7 @@ export default class AboutPage {
         <div class="about-me-content">
           <section class="profile-card glass-card">
             <figure>
-              <img src="./images/foto_profil.jpg" alt="Foto Profil Muhamad Afriza">
+              <img src="./images/foto_profil.png" alt="Foto Profil">
               <figcaption>
                 <h3>Muhamad Afriza</h3>
               </figcaption>

@@ -4,11 +4,11 @@ import LoginPage from '../pages/auth/login-page';
 import RegisterPage from '../pages/auth/register-page';
 
 const routes = {
-  '/': new HomePage(), 
-  '/home': new HomePage(),
-  '/about': new AboutPage(),
-  '/login': new LoginPage(),
-  '/register': new RegisterPage(),
+  '/': HomePage, 
+  '/home': HomePage,
+  '/about': AboutPage,
+  '/login': LoginPage,
+  '/register': RegisterPage,
 };
 
 export default routes;

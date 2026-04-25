@@ -46,8 +46,14 @@ class App {
       return;
     }
 
-    const page = routes[url];
-    if (!page) return;
+    const PageClass = routes[url];
+    
+    if (!PageClass) {
+       this.#content.innerHTML = '<h2 style="text-align: center; margin-top: 50px;">Halaman Tidak Ditemukan</h2>';
+       return;
+    }
+
+    const page = new PageClass();
 
     if (!document.startViewTransition) {
       this.#content.innerHTML = await page.render();
