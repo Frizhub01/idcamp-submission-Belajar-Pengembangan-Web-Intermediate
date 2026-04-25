@@ -31,6 +31,142 @@ class HomePage {
     return this.view.getTemplate();
   }
 
+  initAddStoryModal() {
+    const modal = document.getElementById("addStoryModal");
+    const fabBtn = document.getElementById("fabAddStory");
+    const closeBtn = document.getElementById("closeModalBtn");
+    const form = document.getElementById("addStoryForm");
+    
+    const fileInput = document.getElementById("fileInput");
+    const video = document.getElementById("cameraVideo");
+    const canvas = document.getElementById("canvas");
+    const captureBtn = document.getElementById("captureBtn");
+    const preview = document.getElementById("imagePreview");
+    const clearPhotoBtn = document.getElementById("clearPhotoBtn");
+
+    // FIX BARU: Memaksa tata letak dengan inline-styles agar tidak membesar dan ganda
+    const setPreviewState = (show) => {
+      if (show) {
+        // Mode: Menampilkan Hasil Jepretan / Pilihan Galeri
+        video.style.display = 'none'; // Sembunyikan video mutlak
+        canvas.style.display = 'none'; // Sembunyikan canvas mutlak
+        captureBtn.style.display = 'none'; // Sembunyikan tombol jepret
+        
+        preview.style.display = 'block'; // Tampilkan gambar
+        preview.style.width = '100%'; // Batasi lebar
+        preview.style.maxHeight = '250px'; // Batasi tinggi agar tidak membesar
+        preview.style.objectFit = 'contain';
+        preview.style.borderRadius = '8px';
+        
+        clearPhotoBtn.style.display = 'inline-block';
+      } else {
+        // Mode: Menampilkan Kamera (Bersiap Memotret)
+        preview.style.display = 'none'; // Sembunyikan gambar mutlak
+        canvas.style.display = 'none'; // Sembunyikan canvas mutlak
+        clearPhotoBtn.style.display = 'none'; // Sembunyikan tombol batal
+        
+        video.style.display = 'block'; // Tampilkan video
+        video.style.width = '100%'; // Batasi lebar kamera
+        video.style.maxHeight = '250px'; // Batasi tinggi kamera
+        video.style.objectFit = 'cover';
+        video.style.borderRadius = '8px';
+        
+        captureBtn.style.display = 'inline-block';
+
+        this.selectedPhotoFile = null;
+        fileInput.value = '';
+        preview.src = '';
+      }
+    };
+
+    fabBtn.addEventListener('click', () => {
+      modal.classList.remove('hidden');
+      setPreviewState(false); // Buka modal dalam mode Kamera
+      this.setupModalMap();
+      this.startCamera(video);
+      setTimeout(() => document.getElementById('descInput').focus(), 100);
+    });
+
+    // ... (Sisa kode seperti event listener closeBtn, fileInput, dan submit form tetap sama) ...
+
+    captureBtn.addEventListener('click', () => {
+      const context = canvas.getContext('2d');
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+      
+      preview.src = canvas.toDataURL('image/jpeg');
+      setPreviewState(true); // Ganti ke mode hasil jepretan
+
+      canvas.toBlob((blob) => {
+        this.selectedPhotoFile = new File([blob], "capture.jpg", { type: "image/jpeg" });
+      }, 'image/jpeg');
+    });
+    
+    clearPhotoBtn.addEventListener('click', () => {
+      setPreviewState(false); // Kembali ke mode Kamera
+    });
+
+    // FIX: Implementasi SweetAlert pada Form Submit
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const desc = document.getElementById('descInput').value;
+      const lat = document.getElementById('inputLat').value;
+      const lon = document.getElementById('inputLon').value;
+
+      if (!this.selectedPhotoFile) {
+        Swal.fire({ icon: 'warning', title: 'Oops...', text: 'Harap pilih gambar dari galeri atau kamera!' });
+        return;
+      }
+
+      // Memaksa z-index SweetAlert agar selalu berada paling depan
+      Swal.fire({
+        title: 'Mengunggah Cerita...',
+        text: 'Mohon tunggu sebentar',
+        allowOutsideClick: false,
+        customClass: { container: 'my-swal-container' }, 
+        didOpen: () => {
+          Swal.showLoading();
+          document.querySelector('.my-swal-container').style.zIndex = '99999';
+        }
+      });
+
+      const response = await StoryApi.addStory({ 
+        description: desc, 
+        photo: this.selectedPhotoFile, 
+        lat, 
+        lon 
+      });
+
+      if (!response.error) {
+        // FIX UTAMA: Tutup modal dan bersihkan form DULUAN sebelum memunculkan pop up sukses
+        this.closeModal();
+        form.reset();
+        setPreviewState(false);
+
+        Swal.fire({
+          icon: 'success',
+          title: 'Berhasil!',
+          text: 'Cerita berhasil ditambahkan!',
+          timer: 1500,
+          showConfirmButton: false,
+          customClass: { container: 'my-swal-container' },
+          didOpen: () => document.querySelector('.my-swal-container').style.zIndex = '99999'
+        }).then(() => {
+          this.loadData(); // Memuat ulang marker di peta
+        });
+      } else {
+        Swal.fire({ 
+          icon: 'error', 
+          title: 'Gagal Mengunggah', 
+          text: response.message,
+          customClass: { container: 'my-swal-container' },
+          didOpen: () => document.querySelector('.my-swal-container').style.zIndex = '99999'
+        });
+      }
+    });
+  }
+
   async afterRender() {
     this.initMap();
     await this.loadData();
@@ -90,122 +226,6 @@ class HomePage {
     const bounds = this.map.getBounds();
     const visibleStories = this.markers.filter((item) => bounds.contains(item.marker.getLatLng())).map((item) => item.data);
     this.view.showStories(visibleStories);
-  }
-
-  initAddStoryModal() {
-    const modal = document.getElementById("addStoryModal");
-    const fabBtn = document.getElementById("fabAddStory");
-    const closeBtn = document.getElementById("closeModalBtn");
-    const form = document.getElementById("addStoryForm");
-    
-    const fileInput = document.getElementById("fileInput");
-    const video = document.getElementById("cameraVideo");
-    const canvas = document.getElementById("canvas");
-    const captureBtn = document.getElementById("captureBtn");
-    const preview = document.getElementById("imagePreview");
-    const clearPhotoBtn = document.getElementById("clearPhotoBtn");
-    const mediaContainer = document.querySelector(".media-container"); 
-
-    // FIX: Logika Tampilan Preview agar tidak ganda
-    const setPreviewState = (show) => {
-      if (show) {
-        mediaContainer.classList.add('hidden'); 
-        canvas.classList.add('hidden'); // <-- Wajib disembunyikan agar tidak double dengan preview
-        preview.classList.remove('hidden');
-        clearPhotoBtn.classList.remove('hidden');
-      } else {
-        mediaContainer.classList.remove('hidden'); 
-        preview.classList.add('hidden');
-        canvas.classList.add('hidden'); 
-        clearPhotoBtn.classList.add('hidden');
-        
-        this.selectedPhotoFile = null;
-        fileInput.value = '';
-        preview.src = '';
-      }
-    };
-
-    fabBtn.addEventListener('click', () => {
-      modal.classList.remove('hidden');
-      setPreviewState(false); // Pastikan state bersih saat modal dibuka
-      this.setupModalMap();
-      this.startCamera(video);
-      setTimeout(() => document.getElementById('descInput').focus(), 100);
-    });
-
-    closeBtn.addEventListener('click', () => this.closeModal());
-
-    fileInput.addEventListener('change', (e) => {
-      const file = e.target.files[0];
-      if (file) {
-        this.selectedPhotoFile = file;
-        preview.src = URL.createObjectURL(file);
-        setPreviewState(true);
-      }
-    });
-
-    captureBtn.addEventListener('click', () => {
-      const context = canvas.getContext('2d');
-      // Set dimensi canvas menyamai video sebelum menggambar
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      context.drawImage(video, 0, 0, canvas.width, canvas.height);
-      
-      preview.src = canvas.toDataURL('image/jpeg');
-      setPreviewState(true);
-
-      canvas.toBlob((blob) => {
-        this.selectedPhotoFile = new File([blob], "capture.jpg", { type: "image/jpeg" });
-      }, 'image/jpeg');
-    });
-    
-    clearPhotoBtn.addEventListener('click', () => {
-      setPreviewState(false);
-    });
-
-    // FIX: Implementasi SweetAlert pada Form Submit
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const desc = document.getElementById('descInput').value;
-      const lat = document.getElementById('inputLat').value;
-      const lon = document.getElementById('inputLon').value;
-
-      if (!this.selectedPhotoFile) {
-        Swal.fire({ icon: 'warning', title: 'Oops...', text: 'Harap pilih gambar dari galeri atau kamera!' });
-        return;
-      }
-
-      Swal.fire({
-        title: 'Mengunggah Cerita...',
-        text: 'Mohon tunggu sebentar',
-        allowOutsideClick: false,
-        didOpen: () => Swal.showLoading()
-      });
-
-      const response = await StoryApi.addStory({ 
-        description: desc, 
-        photo: this.selectedPhotoFile, 
-        lat, 
-        lon 
-      });
-
-      if (!response.error) {
-        Swal.fire({
-          icon: 'success',
-          title: 'Berhasil!',
-          text: 'Cerita berhasil ditambahkan!',
-          timer: 1500,
-          showConfirmButton: false
-        }).then(() => {
-          this.closeModal();
-          this.loadData();
-          form.reset();
-          setPreviewState(false);
-        });
-      } else {
-        Swal.fire({ icon: 'error', title: 'Gagal Mengunggah', text: response.message });
-      }
-    });
   }
 
   setupModalMap() {
