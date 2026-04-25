@@ -240,20 +240,24 @@ class HomePage {
     this.markers.forEach((item) => this.map.removeLayer(item.marker));
     this.markers = [];
 
-    this.allStories = await StoryApi.getStoriesWithLocation();
+    try {
+      this.allStories = await StoryApi.getStoriesWithLocation();
 
-    this.allStories.forEach((story) => {
-      if (story.lat && story.lon) {
-        const marker = L.marker([story.lat, story.lon]).addTo(this.map);
-        marker.bindPopup(`<b>${story.name}</b><br>Tersedia di lokasi ini.`);
-        this.markers.push({
-          marker: marker,
-          data: story,
-        });
-      }
-    });
+      this.allStories.forEach((story) => {
+        if (story.lat && story.lon) {
+          const marker = L.marker([story.lat, story.lon]).addTo(this.map);
+          marker.bindPopup(`<b>${story.name}</b><br>Tersedia di lokasi ini.`);
+          this.markers.push({
+            marker: marker,
+            data: story,
+          });
+        }
+      });
 
-    this.filterStoriesByMapBounds();
+      this.filterStoriesByMapBounds();
+    } catch (error) {
+      this.view.showError(error.message);
+    }
   }
 
   filterStoriesByMapBounds() {

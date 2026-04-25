@@ -71,6 +71,8 @@ class HomeView {
     const container = document.getElementById("storiesContainer");
     const countLabel = document.getElementById("storyCount");
 
+    if (!container || !countLabel) return;
+
     container.innerHTML = "";
     countLabel.innerText = stories.length;
 
@@ -81,7 +83,6 @@ class HomeView {
 
     stories.forEach((story) => {
       const shortDesc = story.description.length > 80 ? story.description.substring(0, 80) + "..." : story.description;
-
       const date = new Date(story.createdAt).toLocaleDateString("id-ID");
 
       container.innerHTML += `
@@ -95,6 +96,26 @@ class HomeView {
         </div>
       `;
     });
+  }
+
+  showError(message) {
+    const container = document.getElementById("storiesContainer");
+    const countLabel = document.getElementById("storyCount");
+    
+    if (!container || !countLabel) return;
+    
+    countLabel.innerText = "0";
+    
+    container.innerHTML = `
+      <div class="story-card" style="text-align: center; padding: 40px 20px; flex-direction: column; align-items: center; justify-content: center; border: 1px solid rgba(231, 76, 60, 0.4);">
+        <div style="font-size: 3rem; margin-bottom: 15px;">📡</div>
+        <h3 style="color: #e74c3c; margin-bottom: 10px;">Koneksi Terputus</h3>
+        <p style="color: var(--text-main); margin-bottom: 20px;">${message}</p>
+        <button onclick="window.location.reload()" class="submit-btn" style="width: auto; padding: 10px 24px; margin-top: 0;">
+          Coba Muat Ulang
+        </button>
+      </div>
+    `;
   }
 }
 

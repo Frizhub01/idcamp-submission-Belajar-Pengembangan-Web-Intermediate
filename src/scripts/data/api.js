@@ -41,13 +41,13 @@ class StoryApi {
       const responseJson = await response.json();
       
       if (!responseJson.error) {
-        return responseJson.listStory; 
+        return responseJson.listStory || []; 
       } else {
         throw new Error(responseJson.message);
       }
     } catch (error) {
       console.error('Gagal mengambil data cerita:', error);
-      return []; 
+      throw new Error('Gagal terhubung ke jaringan. Periksa koneksi internet Anda.'); 
     }
   }
 
