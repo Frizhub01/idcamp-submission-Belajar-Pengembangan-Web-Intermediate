@@ -1,0 +1,118 @@
+/* =========================================
+   Header & Navigasi (Glassmorphism)
+   ========================================= */
+header {
+  background: rgb(192, 225, 210, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+  position: sticky;
+  top: 0;
+  z-index: 900;
+  box-shadow: var(--shadow-sm);
+}
+
+.main-header {
+  min-height: 70px;
+  padding: 15px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.brand-name {
+  font-size: 1.5rem;
+  font-weight: 800;
+  text-decoration: none;
+  color: var(--primary-color);
+  letter-spacing: -0.5px;
+}
+
+/* Navigation Drawer Styling (Mobile) */
+.navigation-drawer {
+  min-height: 100vh;
+  width: 250px;
+  padding: 20px;
+  background: rgb(229, 238, 228, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-right: 1px solid rgba(255, 255, 255, 0.4);
+  position: fixed;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  box-shadow: var(--shadow-lg);
+  transform: translateX(-100%);
+  transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+  z-index: 9999;
+}
+
+.navigation-drawer.open {
+  transform: translateX(0);
+}
+
+.drawer-button {
+  padding: 8px 12px;
+  border: 0;
+  border-radius: 8px;
+  background-color: var(--accent-color);
+  color: var(--primary-color);
+  font-size: 24px;
+  cursor: pointer;
+  transition: background-color var(--transition-speed), transform 0.2s;
+}
+
+.drawer-button:hover {
+  background-color: var(--secondary-color);
+  color: var(--surface-white);
+  transform: scale(1.05);
+}
+
+.nav-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.nav-list li a {
+  padding: 10px 15px;
+  display: block;
+  color: var(--text-main);
+  text-decoration: none;
+  font-weight: 600;
+  border-radius: 8px;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.nav-list li a:hover {
+  background-color: var(--primary-color);
+  color: var(--surface-white);
+}
+
+/* Desktop Navigation overrides */
+@media screen and (min-width: 1000px) {
+  .navigation-drawer {
+    min-height: auto;
+    width: auto;
+    padding: 0;
+    background: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border: none;
+    box-shadow: none;
+    position: static;
+    transform: translateX(0);
+  }
+
+  .nav-list {
+    flex-direction: row;
+    margin-top: 0;
+  }
+
+  .drawer-button {
+    display: none;
+  }
+}

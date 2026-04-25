@@ -1,5 +1,9 @@
-import '../styles/styles.css';
-import '../styles/about-page.css';
+import '../styles/variables.css';
+import '../styles/base.css';
+import '../styles/components/navbar.css';
+import '../styles/components/modal.css';
+import '../styles/pages/home-page.css';
+import '../styles/pages/about-page.css';
 
 import App from './pages/app';
 

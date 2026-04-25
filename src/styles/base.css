@@ -1,0 +1,82 @@
+/* =========================================
+   Reset & Global Styles
+   ========================================= */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Inter", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-main);
+  line-height: 1.6;
+}
+
+/* =========================================
+   Aksesibilitas (Standar Advance WCAG)
+   ========================================= */
+.skip-link {
+  position: absolute;
+  top: -100px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: var(--primary-color);
+  color: var(--surface-white);
+  padding: 12px 24px;
+  z-index: 10000;
+  text-decoration: none;
+  font-weight: bold;
+  border-radius: 0 0 12px 12px;
+  transition: top var(--transition-speed) ease;
+  box-shadow: var(--shadow-md);
+}
+
+.skip-link:focus {
+  top: 0;
+}
+
+*:focus-visible {
+  outline: 3px solid var(--primary-color);
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+
+/* =========================================
+   Custom Scrollbar
+   ========================================= */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(116, 141, 174, 0.4);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-color);
+}
+
+/* =========================================
+   View Transition Animasi Smooth
+   ========================================= */
+::view-transition-old(root) {
+  animation: 300ms cubic-bezier(0.4, 0, 1, 1) both fade-out-scale;
+}
+
+::view-transition-new(root) {
+  animation: 300ms cubic-bezier(0, 0, 0.2, 1) both fade-in-scale;
+}
+
+@keyframes fade-out-scale {
+  from { opacity: 1; transform: scale(1); }
+  to { opacity: 0; transform: scale(0.95); }
+}
+
+@keyframes fade-in-scale {
+  from { opacity: 0; transform: scale(1.05); }
+  to { opacity: 1; transform: scale(1); }
+}

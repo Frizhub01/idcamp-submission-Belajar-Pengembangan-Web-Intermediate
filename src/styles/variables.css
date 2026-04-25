@@ -1,0 +1,19 @@
+/* =========================================
+   Variabel Global & Skema Warna
+   ========================================= */
+:root {
+  --bg-color: #f1f0e8;
+  --primary-color: #89a8b2;
+  --secondary-color: #b3c8cf;
+  --accent-color: #e5e1da;
+  --text-main: #2c3e50;
+  --text-muted: #596a7a;
+  --surface-white: #ffffff;
+
+  /* Bayangan disesuaikan dengan warna primary */
+  --shadow-sm: 0 4px 6px rgba(137, 168, 178, 0.15);
+  --shadow-md: 0 8px 15px rgba(137, 168, 178, 0.25);
+  --shadow-lg: 0 12px 24px rgba(137, 168, 178, 0.35);
+  --border-radius: 16px;
+  --transition-speed: 0.3s;
+}
