@@ -2,7 +2,11 @@ class HomeView {
   getTemplate() {
     return `
       <section class="home-layout">
-        <button id="fabAddStory" class="fab-btn" aria-label="Tambah Cerita Baru">➕ Tambah Cerita</button>
+        <h1 class="visually-hidden">StoryDrop - Jelajahi Cerita Dunia</h1>
+
+        <a href="#/add" id="fabAddStory" class="fab-btn" aria-label="Tambah Cerita Baru">
+          <i class="fas fa-plus"></i> Tambah Cerita
+        </a>
         
         <div class="map-section">
           <h2>Peta Lokasi Cerita</h2>
@@ -15,69 +19,20 @@ class HomeView {
           </div>
         </div>
       </section>
-
-      <div id="addStoryModal" class="modal-overlay hidden">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h3>Bagikan Cerita Baru</h3>
-            <button id="closeModalBtn" class="close-btn" aria-label="Tutup">&times;</button>
-          </div>
-          <form id="addStoryForm">
-            <div class="form-group">
-              <label for="descInput">Deskripsi Singkat</label>
-              <textarea id="descInput" maxlength="500" placeholder="Tuliskan cerita singkatmu..."></textarea>
-              <small id="charCounter" class="char-counter">0 / 500 karakter</small>
-            </div>
-
-            <div class="media-container">
-              <div class="media-box">
-                <label for="fileInput">Pilih dari Galeri</label>
-                <input type="file" id="fileInput" accept="image/*">
-              </div>
-              <div class="media-box">
-                <label>Atau Ambil Kamera</label>
-                <div class="camera-wrapper">
-                  <video id="cameraVideo" autoplay playsinline></video>
-                  <button type="button" id="captureBtn">📸 Jepret Foto</button>
-                </div>
-              </div>
-            </div>
-            
-            <div class="preview-box">
-              <p>Pratinjau Foto:</p>
-              <img id="imagePreview" alt="Pratinjau" class="hidden">
-              <canvas id="canvas" class="hidden" width="320" height="240"></canvas>
-              <button type="button" id="clearPhotoBtn" class="hidden" style="margin-top: 10px; color: red;">❌ Batal / Hapus Foto</button>
-            </div>
-
-            <div class="form-group">
-              <label>Pilih Titik Lokasi Peta (Klik Peta)</label>
-              <div id="modalMap" class="modal-map-container"></div>
-              <div class="coord-inputs">
-                <input type="text" id="inputLat" readonly placeholder="Latitude" aria-label="Latitude">
-                <input type="text" id="inputLon" readonly placeholder="Longitude" aria-label="Longitude">
-              </div>
-            </div>
-
-            <p id="modalFeedback" class="feedback-msg"></p>
-            <button type="submit" id="btnSubmitStory" class="submit-btn">Kirim Cerita</button>
-          </form>
-        </div>
-      </div>
     `;
   }
 
   showStories(stories) {
     const container = document.getElementById("storiesContainer");
     const countLabel = document.getElementById("storyCount");
-
+    
     if (!container || !countLabel) return;
 
-    container.innerHTML = "";
     countLabel.innerText = stories.length;
+    container.innerHTML = "";
 
     if (stories.length === 0) {
-      container.innerHTML = "<p>Tidak ada cerita di area ini.</p>";
+      container.innerHTML = '<p style="text-align:center; padding: 20px;">Tidak ada cerita di area peta ini.</p>';
       return;
     }
 
@@ -86,36 +41,22 @@ class HomeView {
       const date = new Date(story.createdAt).toLocaleDateString("id-ID");
 
       container.innerHTML += `
-        <div class="story-card" id="story-${story.id}">
+        <article class="story-card" id="story-${story.id}">
           <img src="${story.photoUrl}" alt="Foto cerita oleh ${story.name}" class="story-img" crossorigin="anonymous">
           <div class="story-info">
-            <h4>${story.name}</h4>
-            <span class="story-date">${date}</span>
+            <h3>${story.name}</h3> <span class="story-date">${date}</span>
             <p>${shortDesc}</p>
           </div>
-        </div>
+        </article>
       `;
     });
   }
 
   showError(message) {
     const container = document.getElementById("storiesContainer");
-    const countLabel = document.getElementById("storyCount");
-    
-    if (!container || !countLabel) return;
-    
-    countLabel.innerText = "0";
-    
-    container.innerHTML = `
-      <div class="story-card" style="text-align: center; padding: 40px 20px; flex-direction: column; align-items: center; justify-content: center; border: 1px solid rgba(231, 76, 60, 0.4);">
-        <div style="font-size: 3rem; margin-bottom: 15px;">📡</div>
-        <h3 style="color: #e74c3c; margin-bottom: 10px;">Koneksi Terputus</h3>
-        <p style="color: var(--text-main); margin-bottom: 20px;">${message}</p>
-        <button onclick="window.location.reload()" class="submit-btn" style="width: auto; padding: 10px 24px; margin-top: 0;">
-          Coba Muat Ulang
-        </button>
-      </div>
-    `;
+    if (container) {
+      container.innerHTML = `<p class="error-message">${message}</p>`;
+    }
   }
 }
 

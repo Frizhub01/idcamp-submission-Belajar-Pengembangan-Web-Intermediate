@@ -2,7 +2,7 @@ export default class AboutPage {
   async render() {
     return `
       <aside class="about-me" id="tentang-saya">
-        <h2 class="about-me-title">Tentang Saya</h2>
+        <h1 class="about-me-title">Tentang Saya</h1>
 
         <div class="about-me-content">
           <section class="profile-card glass-card">
