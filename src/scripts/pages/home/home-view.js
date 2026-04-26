@@ -2,7 +2,7 @@ class HomeView {
   getTemplate() {
     return `
       <section class="home-layout">
-        <h1 class="visually-hidden">StoryDrop - Jelajahi Cerita Dunia</h1>
+        <h1 class="visually-hidden">StoryDrop</h1>
 
         <a href="#/add" id="fabAddStory" class="fab-btn" aria-label="Tambah Cerita Baru">
           <i class="fas fa-plus"></i> Tambah Cerita
@@ -25,7 +25,7 @@ class HomeView {
   showStories(stories) {
     const container = document.getElementById("storiesContainer");
     const countLabel = document.getElementById("storyCount");
-    
+
     if (!container || !countLabel) return;
 
     countLabel.innerText = stories.length;

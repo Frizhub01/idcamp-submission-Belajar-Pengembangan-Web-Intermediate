@@ -116,3 +116,31 @@ header {
     display: none;
   }
 }
+
+/* Styling khusus untuk tombol Logout */
+.btn-logout {
+  background-color: #dc3545;
+  color: white !important;
+  padding: 8px 20px !important;
+  border-radius: 50px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.btn-logout:hover {
+  background-color: #c82333; 
+  transform: translateY(-2px); 
+  color: white !important;
+}
+
+/* Penyesuaian agar di tampilan mobile (drawer) tetap rapi */
+@media screen and (max-width: 768px) {
+  .btn-logout {
+    display: flex;
+    justify-content: center;
+    margin: 10px 20px;
+  }
+}

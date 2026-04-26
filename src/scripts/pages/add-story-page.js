@@ -1,11 +1,22 @@
-import StoryApi from "../../data/api";
+import StoryApi from "../data/api";
 import * as L from "leaflet";
 import Swal from "sweetalert2";
+import "leaflet/dist/leaflet.css";
+import icon from "leaflet/dist/images/marker-icon.png";
+import iconShadow from "leaflet/dist/images/marker-shadow.png";
+import iconRetina from "leaflet/dist/images/marker-icon-2x.png";
+
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: iconRetina,
+  iconUrl: icon,
+  shadowUrl: iconShadow,
+});
 
 class AddStoryPage {
   async render() {
     return `
-      <section class="add-story-container container" style="padding-top: 80px; max-width: 800px; margin: 0 auto;">
+      <section class="add-story-container container" style="padding-top: 80px; max-width: 800px; margin: 0 auto; margin-bottom: 50px;">
         <h1 style="text-align: center; margin-bottom: 20px;">Bagikan Cerita Baru</h1>
         <form id="addStoryForm" class="glass-card" style="padding: 20px; border-radius: 12px; display: flex; flex-direction: column; gap: 20px;">
           
@@ -30,7 +41,7 @@ class AddStoryPage {
 
           <div class="map-picker-section">
             <label style="font-weight: bold; display: block; margin-bottom: 10px;">Pilih Lokasi di Peta (Opsional)</label>
-            <div id="modalMap" style="height: 300px; width: 100%; border-radius: 8px; border: 1px solid #ccc; z-index: 1;"></div>
+            <div id="modalMap" style="height: 300px; width: 100%; border-radius: 8px; border: 1px solid #ccc; z-index: 0;"></div>
             <input type="hidden" id="inputLat">
             <input type="hidden" id="inputLon">
           </div>
@@ -49,7 +60,6 @@ class AddStoryPage {
   }
 
   _initMapPicker() {
-    // Timeout diperlukan agar Leaflet merender peta dengan ukuran yang benar saat SPA pindah halaman
     setTimeout(() => {
       const map = L.map("modalMap").setView([-2.5489, 118.0149], 5);
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -58,7 +68,6 @@ class AddStoryPage {
       
       let marker = null;
 
-      // Jika GPS tersedia, arahkan peta ke lokasi user saat ini
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition((position) => {
           const userLat = position.coords.latitude;
@@ -73,7 +82,6 @@ class AddStoryPage {
         });
       }
 
-      // Klik peta untuk memilih lokasi
       map.on("click", (e) => {
         const { lat, lng } = e.latlng;
         document.getElementById("inputLat").value = lat;
@@ -94,7 +102,7 @@ class AddStoryPage {
       const stream = await navigator.mediaDevices.getUserMedia({ video: true });
       const video = document.getElementById("cameraVideo");
       video.srcObject = stream;
-      window.cameraStream = stream; // Disimpan agar index.js bisa mematikannya saat pindah halaman
+      window.cameraStream = stream;
     } catch (err) {
       console.error("Gagal akses kamera", err);
       Swal.fire({ icon: "info", title: "Kamera", text: "Kamera tidak tersedia, silakan gunakan fitur upload dari galeri." });
@@ -105,16 +113,13 @@ class AddStoryPage {
     const form = document.getElementById("addStoryForm");
     const descInput = document.getElementById("descInput");
     const charCounter = document.getElementById("charCounter");
-    
     const captureBtn = document.getElementById("captureBtn");
     const clearPhotoBtn = document.getElementById("clearPhotoBtn");
     const fileInput = document.getElementById("fileInput");
-    
     const video = document.getElementById("cameraVideo");
     const canvas = document.getElementById("canvas");
     const preview = document.getElementById("imagePreview");
 
-    // Logika karakter counter
     descInput.addEventListener("input", () => {
       const currentLen = descInput.value.length;
       charCounter.innerText = `${currentLen} / 500 karakter`;
@@ -125,7 +130,6 @@ class AddStoryPage {
       }
     });
 
-    // Fungsi mengatur tampilan Preview/Kamera
     const setPreviewState = (show) => {
       if (show) {
         video.style.display = "none";
@@ -137,30 +141,25 @@ class AddStoryPage {
         clearPhotoBtn.style.display = "none";
         video.style.display = "block";
         captureBtn.style.display = "inline-block";
-        
         this.selectedFile = null;
         fileInput.value = "";
         preview.src = "";
       }
     };
 
-    // Tombol Ambil Foto
     captureBtn.addEventListener("click", () => {
       if (!video.srcObject) return;
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
       canvas.getContext("2d").drawImage(video, 0, 0);
-      
       const dataUrl = canvas.toDataURL("image/jpeg");
       preview.src = dataUrl;
       setPreviewState(true);
-      
       canvas.toBlob((blob) => {
         this.selectedFile = new File([blob], "capture.jpg", { type: "image/jpeg" });
       });
     });
 
-    // Upload dari File/Galeri
     fileInput.addEventListener("change", (e) => {
       const file = e.target.files[0];
       if (file) {
@@ -174,15 +173,12 @@ class AddStoryPage {
       }
     });
 
-    // Tombol Ulangi Foto
     clearPhotoBtn.addEventListener("click", () => {
       setPreviewState(false);
     });
 
-    // Submit Form
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
-      
       const desc = descInput.value;
       const lat = document.getElementById("inputLat").value;
       const lon = document.getElementById("inputLon").value;
@@ -199,7 +195,6 @@ class AddStoryPage {
         didOpen: () => Swal.showLoading(),
       });
 
-      // Panggil API Tambah Cerita
       const response = await StoryApi.addStory({
         description: desc,
         photo: this.selectedFile,
@@ -215,7 +210,6 @@ class AddStoryPage {
           timer: 1500,
           showConfirmButton: false,
         }).then(() => {
-          // Arahkan kembali ke halaman beranda setelah berhasil
           window.location.hash = '#/';
         });
       } else {

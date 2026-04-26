@@ -6,6 +6,7 @@ import '../styles/pages/home-page.css';
 import '../styles/pages/about-page.css';
 
 import App from './pages/app';
+import Swal from 'sweetalert2';
 
 document.addEventListener('DOMContentLoaded', async () => {
   const app = new App({
@@ -24,9 +25,25 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   const logoutBtn = document.querySelector('#logout-button');
   if (logoutBtn) {
-    logoutBtn.addEventListener('click', () => {
-      localStorage.removeItem('token');
-      window.location.hash = '#/login';
+    logoutBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      
+      Swal.fire({
+        title: 'Keluar dari StoryDrop?',
+        text: 'Kamu harus login kembali untuk melihat dan membagikan cerita.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc3545',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: '<i class="fas fa-sign-out-alt"></i> Ya, Logout',
+        cancelButtonText: 'Batal',
+        reverseButtons: true
+      }).then((result) => {
+        if (result.isConfirmed) {
+          localStorage.removeItem('token');
+          window.location.hash = '#/login';
+        }
+      });
     });
   }
 
@@ -37,7 +54,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       window.cameraStream.getTracks().forEach(track => track.stop());
       window.cameraStream = null;
     }
-    
+
     await app.renderPage();
   });
 });
