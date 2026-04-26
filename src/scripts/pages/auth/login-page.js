@@ -5,7 +5,7 @@ class LoginPage {
   async render() {
     return `
       <section class="auth-container">
-        <h2>Masuk ke Akun Anda</h2>
+        <h1>Masuk ke Akun Anda</h1>
         <form id="loginForm">
           <div class="form-group">
             <label for="email">Email</label>

@@ -9,7 +9,7 @@ export default class AboutPage {
             <figure>
               <img src="./images/foto_profil.png" alt="Foto Profil">
               <figcaption>
-                <h3>Muhamad Afriza</h3>
+                <h2>Muhamad Afriza</h2>
               </figcaption>
             </figure>
             <p class="profile-job-title">Junior Web Developer</p>
@@ -39,27 +39,27 @@ export default class AboutPage {
           <section class="profile-details">
             <div class="details-wrapper">
               <section class="bio-section glass-card">
-                <h3>Bio</h3>
+                <h2>Bio</h2>
                 <p>
                   Perkenalkan, saya Muhamad Afriza, mahasiswa S1 Pendidikan Matematika di UIN Sunan Gunung Djati. Dengan latar belakang analitis dari matematika, saat ini saya mendedikasikan diri untuk mendalami pengembangan web dan berambisi untuk memulai karir sebagai seorang Web Developer.
                 </p>
               </section>
 
               <section class="education-section glass-card">
-                <h3>Pendidikan Formal</h3>
+                <h2>Pendidikan Formal</h2>
                 <div class="education-item">
-                  <h4>Universitas Islam Negeri Sunan Gunung Djati (2023 - 2027)</h4>
+                  <p><strong>Universitas Islam Negeri Sunan Gunung Djati (2023 - 2027)</strong></p>
                   <p>S1 - Pendidikan Matematika</p>
                 </div>
                 <div class="education-item">
-                  <h4>SMK Istiqomah (2020 - 2023)</h4>
+                  <p><strong>SMK Istiqomah (2020 - 2023)</strong></p>
                   <p>Farmasi</p>
                 </div>
               </section>
             </div>
 
             <section class="social-section glass-card">
-              <h3>Ikuti Media Sosial Saya</h3>
+              <h2>Ikuti Media Sosial Saya</h2>
               <div class="social-icons">
                 <a href="https://github.com/Frizhub01" target="_blank" aria-label="GitHub"><i class="fab fa-github"></i></a>
                 <a href="https://www.instagram.com/frz_326/" target="_blank" aria-label="Instagram"><i class="fab fa-instagram"></i></a>

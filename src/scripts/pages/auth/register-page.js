@@ -5,7 +5,7 @@ class RegisterPage {
   async render() {
     return `
       <section class="auth-container">
-        <h2>Daftar Akun Baru</h2>
+        <h1>Daftar Akun Baru</h1>
         <form id="registerForm">
           <div class="form-group">
             <label for="name">Nama</label>
