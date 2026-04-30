@@ -1,5 +1,6 @@
 import routes from "../routes/routes";
 import { getActiveRoute } from "../routes/url-parser";
+import Swal from "sweetalert2";
 
 class App {
   #content = null;
@@ -12,6 +13,8 @@ class App {
     this.#navigationDrawer = navigationDrawer;
 
     this._setupDrawer();
+    this._setupSkipLink();
+    this._setupLogout();
   }
 
   _setupDrawer() {
@@ -32,12 +35,62 @@ class App {
     });
   }
 
+  _setupSkipLink() {
+    const skipLink = document.querySelector('.skip-link');
+    const mainContent = document.querySelector('#main-content');
+    
+    if (skipLink && mainContent) {
+      skipLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        mainContent.focus(); 
+      });
+    }
+  }
+
+  _setupLogout() {
+    const logoutBtn = document.querySelector('#logout-button');
+    if (logoutBtn) {
+      logoutBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        
+        Swal.fire({
+          title: 'Apakah Anda yakin?',
+          text: "Anda akan keluar dari aplikasi!",
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#d33',
+          cancelButtonColor: '#3085d6',
+          confirmButtonText: 'Ya, Logout!',
+          cancelButtonText: 'Batal'
+        }).then((result) => {
+          if (result.isConfirmed) {
+            localStorage.removeItem('token');
+            window.location.hash = '#/login';
+            
+            Swal.fire({
+              icon: 'success',
+              title: 'Berhasil Logout',
+              text: 'Sampai jumpa kembali!',
+              timer: 1500,
+              showConfirmButton: false
+            });
+          }
+        });
+      });
+    }
+  }
+
   async renderPage() {
+    if (window.cameraStream) {
+      window.cameraStream.getTracks().forEach(track => track.stop());
+      window.cameraStream = null;
+    }
+
     const url = getActiveRoute();
     const token = localStorage.getItem('token');
 
     if (token && (url === '/login' || url === '/register')) {
-      window.location.hash = '#/home';
+      window.location.hash = '#/';
       return;
     }
 

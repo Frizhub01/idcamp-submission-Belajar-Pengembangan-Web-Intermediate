@@ -27,13 +27,14 @@ class AddStoryPage {
           </div>
 
           <div class="camera-section" style="display: flex; flex-direction: column; gap: 10px;">
-            <label style="font-weight: bold;">Foto</label>
+            <label for="fileInput" style="font-weight: bold;">Foto (Pilih dari Galeri atau Kamera)</label>
             <video id="cameraVideo" autoplay playsinline style="width: 100%; max-height: 300px; object-fit: cover; border-radius: 8px; background: #000;"></video>
             <canvas id="canvas" style="display:none;"></canvas>
             <img id="imagePreview" style="width: 100%; max-height: 300px; object-fit: contain; border-radius: 8px; display:none;">
             
             <div class="camera-controls" style="display: flex; gap: 10px; flex-wrap: wrap;">
               <button type="button" id="captureBtn" style="padding: 10px 15px; border: none; border-radius: 8px; background: #007bff; color: white; cursor: pointer;">Ambil Foto</button>
+              <button type="button" id="toggleCameraBtn" style="padding: 10px 15px; border: none; border-radius: 8px; background: #dc3545; color: white; cursor: pointer;">Tutup Kamera</button>
               <button type="button" id="clearPhotoBtn" style="padding: 10px 15px; border: none; border-radius: 8px; background: #dc3545; color: white; cursor: pointer; display:none;">Ulangi</button>
               <input type="file" id="fileInput" accept="image/*" style="padding: 8px;">
             </div>
@@ -54,9 +55,10 @@ class AddStoryPage {
 
   async afterRender() {
     this.selectedFile = null;
+    this.isCameraOn = false;
     this._initFormLogic();
     this._initMapPicker();
-    this._startCamera();
+    await this._startCamera();
   }
 
   _initMapPicker() {
@@ -101,12 +103,32 @@ class AddStoryPage {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ video: true });
       const video = document.getElementById("cameraVideo");
-      video.srcObject = stream;
-      window.cameraStream = stream;
+      if (video) {
+        video.srcObject = stream;
+        window.cameraStream = stream;
+        this.isCameraOn = true;
+      }
     } catch (err) {
       console.error("Gagal akses kamera", err);
       Swal.fire({ icon: "info", title: "Kamera", text: "Kamera tidak tersedia, silakan gunakan fitur upload dari galeri." });
+      
+      const toggleCameraBtn = document.getElementById("toggleCameraBtn");
+      const captureBtn = document.getElementById("captureBtn");
+      if(toggleCameraBtn) toggleCameraBtn.style.display = "none";
+      if(captureBtn) captureBtn.style.display = "none";
     }
+  }
+
+  _stopCamera() {
+    if (window.cameraStream) {
+      window.cameraStream.getTracks().forEach(track => track.stop());
+      window.cameraStream = null;
+    }
+    const video = document.getElementById("cameraVideo");
+    if (video) {
+      video.srcObject = null;
+    }
+    this.isCameraOn = false;
   }
 
   _initFormLogic() {
@@ -114,6 +136,7 @@ class AddStoryPage {
     const descInput = document.getElementById("descInput");
     const charCounter = document.getElementById("charCounter");
     const captureBtn = document.getElementById("captureBtn");
+    const toggleCameraBtn = document.getElementById("toggleCameraBtn");
     const clearPhotoBtn = document.getElementById("clearPhotoBtn");
     const fileInput = document.getElementById("fileInput");
     const video = document.getElementById("cameraVideo");
@@ -130,10 +153,23 @@ class AddStoryPage {
       }
     });
 
+    toggleCameraBtn.addEventListener("click", async () => {
+      if (this.isCameraOn) {
+        this._stopCamera();
+        toggleCameraBtn.innerText = "Nyalakan Kamera";
+        toggleCameraBtn.style.background = "#28a745"; 
+      } else {
+        await this._startCamera();
+        toggleCameraBtn.innerText = "Tutup Kamera";
+        toggleCameraBtn.style.background = "#dc3545"; 
+      }
+    });
+
     const setPreviewState = (show) => {
       if (show) {
         video.style.display = "none";
         captureBtn.style.display = "none";
+        toggleCameraBtn.style.display = "none";
         preview.style.display = "block";
         clearPhotoBtn.style.display = "inline-block";
       } else {
@@ -141,14 +177,25 @@ class AddStoryPage {
         clearPhotoBtn.style.display = "none";
         video.style.display = "block";
         captureBtn.style.display = "inline-block";
+        toggleCameraBtn.style.display = "inline-block";
+        
         this.selectedFile = null;
         fileInput.value = "";
         preview.src = "";
+
+        if (!this.isCameraOn) {
+          this._startCamera();
+          toggleCameraBtn.innerText = "Tutup Kamera";
+          toggleCameraBtn.style.background = "#dc3545";
+        }
       }
     };
 
     captureBtn.addEventListener("click", () => {
-      if (!video.srcObject) return;
+      if (!video.srcObject) {
+        Swal.fire({ icon: "warning", title: "Kamera Mati", text: "Nyalakan kamera terlebih dahulu untuk mengambil foto!" });
+        return;
+      }
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
       canvas.getContext("2d").drawImage(video, 0, 0);
@@ -158,6 +205,10 @@ class AddStoryPage {
       canvas.toBlob((blob) => {
         this.selectedFile = new File([blob], "capture.jpg", { type: "image/jpeg" });
       });
+      
+      this._stopCamera();
+      toggleCameraBtn.innerText = "Nyalakan Kamera";
+      toggleCameraBtn.style.background = "#28a745";
     });
 
     fileInput.addEventListener("change", (e) => {
@@ -168,6 +219,10 @@ class AddStoryPage {
         reader.onload = (event) => {
           preview.src = event.target.result;
           setPreviewState(true);
+          
+          this._stopCamera();
+          toggleCameraBtn.innerText = "Nyalakan Kamera";
+          toggleCameraBtn.style.background = "#28a745";
         };
         reader.readAsDataURL(file);
       }
