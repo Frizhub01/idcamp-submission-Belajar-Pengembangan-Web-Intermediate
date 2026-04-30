@@ -30,7 +30,7 @@ class AddStoryPage {
             <label for="fileInput" style="font-weight: bold;">Foto (Pilih dari Galeri atau Kamera)</label>
             <video id="cameraVideo" autoplay playsinline style="width: 100%; max-height: 300px; object-fit: cover; border-radius: 8px; background: #000;"></video>
             <canvas id="canvas" style="display:none;"></canvas>
-            <img id="imagePreview" style="width: 100%; max-height: 300px; object-fit: contain; border-radius: 8px; display:none;">
+            <img id="imagePreview" alt="Preview foto cerita yang dipilih" style="width: 100%; max-height: 300px; object-fit: contain; border-radius: 8px; display:none;">
             
             <div class="camera-controls" style="display: flex; gap: 10px; flex-wrap: wrap;">
               <button type="button" id="captureBtn" style="padding: 10px 15px; border: none; border-radius: 8px; background: #007bff; color: white; cursor: pointer;">Ambil Foto</button>
@@ -41,7 +41,7 @@ class AddStoryPage {
           </div>
 
           <div class="map-picker-section">
-            <label style="font-weight: bold; display: block; margin-bottom: 10px;">Pilih Lokasi di Peta (Opsional)</label>
+            <span style="font-weight: bold; display: block; margin-bottom: 10px;">Pilih Lokasi di Peta</span>
             <div id="modalMap" style="height: 300px; width: 100%; border-radius: 8px; border: 1px solid #ccc; z-index: 0;"></div>
             <input type="hidden" id="inputLat">
             <input type="hidden" id="inputLon">
@@ -65,23 +65,26 @@ class AddStoryPage {
     setTimeout(() => {
       const map = L.map("modalMap").setView([-2.5489, 118.0149], 5);
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        attribution: "© OpenStreetMap contributors"
+        attribution: "© OpenStreetMap contributors",
       }).addTo(map);
-      
+
       let marker = null;
 
       if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition((position) => {
-          const userLat = position.coords.latitude;
-          const userLon = position.coords.longitude;
-          map.setView([userLat, userLon], 13);
-          
-          marker = L.marker([userLat, userLon]).addTo(map);
-          document.getElementById("inputLat").value = userLat;
-          document.getElementById("inputLon").value = userLon;
-        }, () => {
-          console.log("GPS akses ditolak/gagal.");
-        });
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            const userLat = position.coords.latitude;
+            const userLon = position.coords.longitude;
+            map.setView([userLat, userLon], 13);
+
+            marker = L.marker([userLat, userLon]).addTo(map);
+            document.getElementById("inputLat").value = userLat;
+            document.getElementById("inputLon").value = userLon;
+          },
+          () => {
+            console.log("GPS akses ditolak/gagal.");
+          },
+        );
       }
 
       map.on("click", (e) => {
@@ -94,7 +97,7 @@ class AddStoryPage {
           marker = L.marker(e.latlng).addTo(map);
         }
       });
-      
+
       map.invalidateSize();
     }, 300);
   }
@@ -111,17 +114,17 @@ class AddStoryPage {
     } catch (err) {
       console.error("Gagal akses kamera", err);
       Swal.fire({ icon: "info", title: "Kamera", text: "Kamera tidak tersedia, silakan gunakan fitur upload dari galeri." });
-      
+
       const toggleCameraBtn = document.getElementById("toggleCameraBtn");
       const captureBtn = document.getElementById("captureBtn");
-      if(toggleCameraBtn) toggleCameraBtn.style.display = "none";
-      if(captureBtn) captureBtn.style.display = "none";
+      if (toggleCameraBtn) toggleCameraBtn.style.display = "none";
+      if (captureBtn) captureBtn.style.display = "none";
     }
   }
 
   _stopCamera() {
     if (window.cameraStream) {
-      window.cameraStream.getTracks().forEach(track => track.stop());
+      window.cameraStream.getTracks().forEach((track) => track.stop());
       window.cameraStream = null;
     }
     const video = document.getElementById("cameraVideo");
@@ -157,11 +160,11 @@ class AddStoryPage {
       if (this.isCameraOn) {
         this._stopCamera();
         toggleCameraBtn.innerText = "Nyalakan Kamera";
-        toggleCameraBtn.style.background = "#28a745"; 
+        toggleCameraBtn.style.background = "#28a745";
       } else {
         await this._startCamera();
         toggleCameraBtn.innerText = "Tutup Kamera";
-        toggleCameraBtn.style.background = "#dc3545"; 
+        toggleCameraBtn.style.background = "#dc3545";
       }
     });
 
@@ -178,7 +181,7 @@ class AddStoryPage {
         video.style.display = "block";
         captureBtn.style.display = "inline-block";
         toggleCameraBtn.style.display = "inline-block";
-        
+
         this.selectedFile = null;
         fileInput.value = "";
         preview.src = "";
@@ -205,7 +208,7 @@ class AddStoryPage {
       canvas.toBlob((blob) => {
         this.selectedFile = new File([blob], "capture.jpg", { type: "image/jpeg" });
       });
-      
+
       this._stopCamera();
       toggleCameraBtn.innerText = "Nyalakan Kamera";
       toggleCameraBtn.style.background = "#28a745";
@@ -219,7 +222,7 @@ class AddStoryPage {
         reader.onload = (event) => {
           preview.src = event.target.result;
           setPreviewState(true);
-          
+
           this._stopCamera();
           toggleCameraBtn.innerText = "Nyalakan Kamera";
           toggleCameraBtn.style.background = "#28a745";
@@ -265,7 +268,7 @@ class AddStoryPage {
           timer: 1500,
           showConfirmButton: false,
         }).then(() => {
-          window.location.hash = '#/';
+          window.location.hash = "#/";
         });
       } else {
         Swal.fire({ icon: "error", title: "Gagal Mengunggah", text: response.message });
