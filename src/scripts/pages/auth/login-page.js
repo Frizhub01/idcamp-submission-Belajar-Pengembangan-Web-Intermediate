@@ -9,11 +9,11 @@ class LoginPage {
         <form id="loginForm">
           <div class="form-group">
             <label for="email">Email</label>
-            <input type="email" id="email" required>
+            <input type="email" id="email" autocomplete="email" required>
           </div>
           <div class="form-group">
             <label for="password">Password</label>
-            <input type="password" id="password" required>
+            <input type="password" id="password" autocomplete="current-password" required>
           </div>
           <button type="submit" id="btnLogin">Masuk</button>
         </form>

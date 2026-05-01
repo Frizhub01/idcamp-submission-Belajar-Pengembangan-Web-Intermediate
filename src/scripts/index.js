@@ -6,7 +6,6 @@ import '../styles/pages/home-page.css';
 import '../styles/pages/about-page.css';
 
 import App from './pages/app';
-import Swal from 'sweetalert2';
 
 document.addEventListener('DOMContentLoaded', async () => {
   const app = new App({
@@ -15,46 +14,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     navigationDrawer: document.querySelector('#navigation-drawer'),
   });
 
-  const skipLink = document.querySelector('.skip-link');
-  const mainContent = document.querySelector('#main-content');
-  
-  skipLink.addEventListener('click', (event) => {
-    event.preventDefault();
-    mainContent.focus();
-  });
-
-  const logoutBtn = document.querySelector('#logout-button');
-  if (logoutBtn) {
-    logoutBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      
-      Swal.fire({
-        title: 'Keluar dari StoryDrop?',
-        text: 'Kamu harus login kembali untuk melihat dan membagikan cerita.',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#dc3545',
-        cancelButtonColor: '#6c757d',
-        confirmButtonText: '<i class="fas fa-sign-out-alt"></i> Ya, Logout',
-        cancelButtonText: 'Batal',
-        reverseButtons: true
-      }).then((result) => {
-        if (result.isConfirmed) {
-          localStorage.removeItem('token');
-          window.location.hash = '#/login';
-        }
-      });
-    });
-  }
-
   await app.renderPage();
 
   window.addEventListener('hashchange', async () => {
-    if (window.cameraStream) {
-      window.cameraStream.getTracks().forEach(track => track.stop());
-      window.cameraStream = null;
-    }
-
     await app.renderPage();
   });
 });

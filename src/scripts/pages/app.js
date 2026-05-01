@@ -54,33 +54,36 @@ class App {
         e.preventDefault();
         
         Swal.fire({
-          title: 'Apakah Anda yakin?',
-          text: "Anda akan keluar dari aplikasi!",
+          title: 'Keluar dari StoryDrop?',
+          text: 'Kamu harus login kembali untuk melihat dan membagikan cerita.',
           icon: 'warning',
           showCancelButton: true,
-          confirmButtonColor: '#d33',
-          cancelButtonColor: '#3085d6',
-          confirmButtonText: 'Ya, Logout!',
-          cancelButtonText: 'Batal'
+          confirmButtonColor: '#dc3545',
+          cancelButtonColor: '#6c757d',
+          confirmButtonText: '<i class="fas fa-sign-out-alt"></i> Ya, Logout',
+          cancelButtonText: 'Batal',
+          reverseButtons: true
         }).then((result) => {
           if (result.isConfirmed) {
             localStorage.removeItem('token');
             window.location.hash = '#/login';
-            
-            Swal.fire({
-              icon: 'success',
-              title: 'Berhasil Logout',
-              text: 'Sampai jumpa kembali!',
-              timer: 1500,
-              showConfirmButton: false
-            });
           }
         });
       });
     }
   }
 
+  _updateNavigation() {
+    const hasToken = !!localStorage.getItem('token');
+    const displayStyle = hasToken ? '' : 'none';
+
+    this.#navigationDrawer.style.display = displayStyle;
+    this.#drawerButton.style.display = displayStyle;
+  }
+
   async renderPage() {
+    this._updateNavigation();
+
     if (window.cameraStream) {
       window.cameraStream.getTracks().forEach(track => track.stop());
       window.cameraStream = null;

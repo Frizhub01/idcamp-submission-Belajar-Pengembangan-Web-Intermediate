@@ -9,15 +9,15 @@ class RegisterPage {
         <form id="registerForm">
           <div class="form-group">
             <label for="name">Nama</label>
-            <input type="text" id="name" required>
+            <input type="text" id="name" autocomplete="name" required>
           </div>
           <div class="form-group">
             <label for="email">Email</label>
-            <input type="email" id="email" required>
+            <input type="email" id="email" autocomplete="email" required>
           </div>
           <div class="form-group">
             <label for="password">Password</label>
-            <input type="password" id="password" minlength="8" required>
+            <input type="password" id="password" minlength="8" autocomplete="new-password" required>
           </div>
           <button type="submit" id="btnRegister">Daftar</button>
           <p id="errorMessage" class="error-message"></p>
