@@ -30,6 +30,9 @@ class HomePage {
   }
 
   initMap() {
+    const mapContainer = document.getElementById("mapContainer");
+    if (!mapContainer) return;
+
     if (this.map !== null) {
       this.map.remove();
     }
@@ -60,6 +63,9 @@ class HomePage {
   async loadData() {
     try {
       const stories = await StoryApi.getStoriesWithLocation();
+      
+      if (!this.map) return;
+
       this.markers.forEach((item) => this.map.removeLayer(item.marker));
       this.markers = [];
 
@@ -81,6 +87,8 @@ class HomePage {
   }
 
   filterStoriesByMapBounds() {
+    if (!this.map) return;
+    
     const bounds = this.map.getBounds();
     const visibleStories = this.markers
       .filter((item) => bounds.contains(item.marker.getLatLng()))

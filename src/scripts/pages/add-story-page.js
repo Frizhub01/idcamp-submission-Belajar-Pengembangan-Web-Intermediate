@@ -56,6 +56,7 @@ class AddStoryPage {
   async afterRender() {
     this.selectedFile = null;
     this.isCameraOn = false;
+    this.map = null;
     this._initFormLogic();
     this._initMapPicker();
     await this._startCamera();
@@ -63,10 +64,13 @@ class AddStoryPage {
 
   _initMapPicker() {
     setTimeout(() => {
-      const map = L.map("modalMap").setView([-2.5489, 118.0149], 5);
+      const mapContainer = document.getElementById("modalMap");
+      if (!mapContainer) return;
+
+      this.map = L.map("modalMap").setView([-2.5489, 118.0149], 5);
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
         attribution: "© OpenStreetMap contributors",
-      }).addTo(map);
+      }).addTo(this.map);
 
       let marker = null;
 
@@ -75,30 +79,30 @@ class AddStoryPage {
           (position) => {
             const userLat = position.coords.latitude;
             const userLon = position.coords.longitude;
-            map.setView([userLat, userLon], 13);
+            this.map.setView([userLat, userLon], 13);
 
-            marker = L.marker([userLat, userLon]).addTo(map);
+            marker = L.marker([userLat, userLon]).addTo(this.map);
             document.getElementById("inputLat").value = userLat;
             document.getElementById("inputLon").value = userLon;
           },
           () => {
             console.log("GPS akses ditolak/gagal.");
-          },
+          }
         );
       }
 
-      map.on("click", (e) => {
+      this.map.on("click", (e) => {
         const { lat, lng } = e.latlng;
         document.getElementById("inputLat").value = lat;
         document.getElementById("inputLon").value = lng;
         if (marker) {
           marker.setLatLng(e.latlng);
         } else {
-          marker = L.marker(e.latlng).addTo(map);
+          marker = L.marker(e.latlng).addTo(this.map);
         }
       });
 
-      map.invalidateSize();
+      this.map.invalidateSize();
     }, 300);
   }
 

@@ -5,6 +5,14 @@ class StoryApi {
     return localStorage.getItem('token');
   }
 
+  static _checkAuth(response) {
+    if (response.status === 401) {
+      localStorage.removeItem('token');
+      window.location.hash = '#/login';
+      throw new Error('Sesi Anda telah berakhir. Silakan login kembali.');
+    }
+  }
+
   static async register({ name, email, password }) {
     const response = await fetch(`${BASE_URL}/register`, {
       method: 'POST',
@@ -32,11 +40,7 @@ class StoryApi {
         },
       });
       
-      if (response.status === 401) {
-        localStorage.removeItem('token');
-        window.location.hash = '#/login';
-        throw new Error('Sesi anda telah tamat. Sila log masuk semula.');
-      }
+      this._checkAuth(response);
 
       const responseJson = await response.json();
       
@@ -47,7 +51,7 @@ class StoryApi {
       }
     } catch (error) {
       console.error('Gagal mengambil data cerita:', error);
-      throw new Error('Gagal terhubung ke jaringan. Periksa koneksi internet Anda.'); 
+      throw new Error(error.message || 'Gagal terhubung ke jaringan. Periksa koneksi internet Anda.'); 
     }
   }
 
@@ -69,18 +73,14 @@ class StoryApi {
         },
         body: data,
       });
-      if (response.status === 401) {
-        localStorage.removeItem('token');
-        window.location.hash = '#/login';
-        return { error: true, message: 'Sesi anda telah tamat. Sila log masuk semula.' };
-      }
+      
+      this._checkAuth(response);
 
       return await response.json();
     } catch (error) {
-      return { error: true, message: 'Gagal terhubung ke jaringan' };
+      return { error: true, message: error.message || 'Gagal terhubung ke jaringan' };
     }
   }
-
 }
 
 export default StoryApi;

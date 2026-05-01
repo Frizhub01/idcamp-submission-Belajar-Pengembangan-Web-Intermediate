@@ -103,7 +103,7 @@ body {
   padding: 32px;
   background-color: #ffffff;
   border-radius: 16px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08); /* Efek melayang halus */
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08); 
   text-align: center;
 }
 
@@ -130,7 +130,7 @@ body {
   width: 100%;
   padding: 12px 16px;
   border: 1.5px solid #e0e0e0;
-  border-radius: 8px; /* Sudut melengkung yang rapi */
+  border-radius: 8px;
   font-size: 1rem;
   transition: all 0.3s ease;
   box-sizing: border-box;
@@ -138,14 +138,14 @@ body {
 
 .auth-container .form-group input:focus {
   outline: none;
-  border-color: #2b7a78; /* Warna aksen fokus */
+  border-color: #2b7a78;
   box-shadow: 0 0 0 4px rgba(43, 122, 120, 0.1);
 }
 
 .auth-container button[type="submit"] {
   width: 100%;
   padding: 14px;
-  background-color: #2b7a78; /* Warna tombol */
+  background-color: #2b7a78;
   color: white;
   border: none;
   border-radius: 8px;
