@@ -1,4 +1,22 @@
+import * as L from "leaflet";
+import "leaflet/dist/leaflet.css";
+import icon from "leaflet/dist/images/marker-icon.png";
+import iconShadow from "leaflet/dist/images/marker-shadow.png";
+import iconRetina from "leaflet/dist/images/marker-icon-2x.png";
+
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: iconRetina,
+  iconUrl: icon,
+  shadowUrl: iconShadow,
+});
+
 class HomeView {
+  constructor() {
+    this.map = null;
+    this.markers = [];
+  }
+
   getTemplate() {
     return `
       <section class="home-layout">
@@ -10,7 +28,7 @@ class HomeView {
         
         <div class="map-section">
           <h2>Peta Lokasi Cerita</h2>
-          <div id="mapContainer" class="map-container"></div>
+          <div id="mapContainer" class="map-container" style="height: 400px;"></div>
         </div>
         <div class="list-section">
           <h2>Daftar Cerita Terlihat (<span id="storyCount">0</span>)</h2>
@@ -20,6 +38,63 @@ class HomeView {
         </div>
       </section>
     `;
+  }
+
+  initMap(onMapMovedCallback) {
+    const mapContainer = document.getElementById("mapContainer");
+    if (!mapContainer) return;
+
+    if (this.map !== null) {
+      this.map.remove();
+    }
+
+    this.map = L.map("mapContainer").setView([-2.5489, 118.0149], 5);
+
+    const osmLayer = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution: "© OpenStreetMap contributors",
+    });
+
+    const darkLayer = L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+      attribution: "© OpenStreetMap & CartoDB",
+    });
+
+    osmLayer.addTo(this.map);
+
+    const baseMaps = {
+      "Peta Terang (OSM)": osmLayer,
+      "Peta Gelap (Dark)": darkLayer,
+    };
+    L.control.layers(baseMaps).addTo(this.map);
+
+    this.map.on("moveend", () => {
+      if (onMapMovedCallback) onMapMovedCallback();
+    });
+  }
+
+  renderMarkers(stories) {
+    if (!this.map) return;
+
+    this.markers.forEach((item) => this.map.removeLayer(item.marker));
+    this.markers = [];
+
+    stories.forEach((story) => {
+      if (story.lat && story.lon) {
+        const marker = L.marker([story.lat, story.lon]).addTo(this.map);
+        marker.bindPopup(`<b>${story.name}</b><br>Tersedia di lokasi ini.`);
+        this.markers.push({
+          marker: marker,
+          data: story,
+        });
+      }
+    });
+  }
+
+  getVisibleStories() {
+    if (!this.map) return [];
+    const bounds = this.map.getBounds();
+    return this.markers
+      .filter((item) => bounds.contains(item.marker.getLatLng()))
+      .map((item) => item.data);
   }
 
   showStories(stories) {
@@ -41,7 +116,7 @@ class HomeView {
       const date = new Date(story.createdAt).toLocaleDateString("id-ID");
 
       container.innerHTML += `
-        <article class="story-card" id="story-${story.id}">
+        <article class="story-card" id="story-${story.id}" style="cursor: pointer;">
           <img src="${story.photoUrl}" alt="Foto cerita oleh ${story.name}" class="story-img" crossorigin="anonymous">
           <div class="story-info">
             <h3>${story.name}</h3> <span class="story-date">${date}</span>
@@ -49,6 +124,23 @@ class HomeView {
           </div>
         </article>
       `;
+    });
+
+    this._bindStoryCardEvents();
+  }
+
+  _bindStoryCardEvents() {
+    const cards = document.querySelectorAll(".story-card");
+    cards.forEach((card) => {
+      card.addEventListener("click", () => {
+        const storyId = card.id.replace("story-", "");
+        const targetItem = this.markers.find((item) => item.data.id === storyId);
+
+        if (targetItem && this.map) {
+          this.map.setView(targetItem.marker.getLatLng(), 13);
+          targetItem.marker.openPopup();
+        }
+      });
     });
   }
 
