@@ -81,6 +81,34 @@ class StoryApi {
       return { error: true, message: error.message || 'Gagal terhubung ke jaringan' };
     }
   }
+
+  static async subscribePushNotification(subscription) {
+    const response = await fetch(`${BASE_URL}/notifications/subscribe`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${this.getAccessToken()}`,
+      },
+      body: JSON.stringify(subscription), 
+    });
+    
+    this._checkAuth(response);
+    return await response.json();
+  }
+
+  static async unsubscribePushNotification(endpoint) {
+    const response = await fetch(`${BASE_URL}/notifications/subscribe`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${this.getAccessToken()}`,
+      },
+      body: JSON.stringify({ endpoint }),
+    });
+    
+    this._checkAuth(response);
+    return await response.json();
+  }
 }
 
 export default StoryApi;

@@ -1,3 +1,5 @@
+import StoryApi from '../data/api';
+
 const VAPID_PUBLIC_KEY = "BCCs2eonMI-6H2ctvFaWg-UYdDv387Vno_bzUzALpB442r2lCnsHmtrx8biyPi_E-1fSGABK_Qs_GlvPoJJqxbk";
 
 const urlB64ToUint8Array = (base64String) => {
@@ -48,7 +50,7 @@ const PushNotification = {
     const subscription = await this._registration.pushManager.getSubscription();
     if (subscription) {
       this._icon.classList.replace("fa-bell-slash", "fa-bell");
-      this._toggleBtn.style.color = "#ffc107"; // Warna saat aktif
+      this._toggleBtn.style.color = "#ffc107";
     } else {
       this._icon.classList.replace("fa-bell", "fa-bell-slash");
       this._toggleBtn.style.color = "";
@@ -58,21 +60,37 @@ const PushNotification = {
   async _toggleSubscription() {
     const subscription = await this._registration.pushManager.getSubscription();
     if (subscription) {
-      await subscription.unsubscribe();
-      console.log("Unsubscribed dari Push Notification");
+      try {
+        await StoryApi.unsubscribePushNotification(subscription.endpoint);
+        await subscription.unsubscribe();
+        console.log('Unsubscribed dari Push Notification');
+      } catch (err) {
+        console.error('Gagal unsubscribe dari server:', err);
+      }
     } else {
       try {
-        await this._registration.pushManager.subscribe({
+        const newSubscription = await this._registration.pushManager.subscribe({
           userVisibleOnly: true,
           applicationServerKey: urlB64ToUint8Array(VAPID_PUBLIC_KEY),
         });
-        console.log("Berhasil Subscribed ke Push Notification");
+        
+        const subData = newSubscription.toJSON();
+        const payload = {
+          endpoint: subData.endpoint,
+          keys: {
+            p256dh: subData.keys.p256dh,
+            auth: subData.keys.auth
+          }
+        };
+
+        await StoryApi.subscribePushNotification(payload); 
+        console.log('Berhasil Subscribed ke Push Notification');
       } catch (err) {
-        console.error("Gagal subscribe:", err);
+        console.error('Gagal subscribe:', err);
       }
     }
     await this._updateUI();
-  },
+  }
 };
 
 export default PushNotification;

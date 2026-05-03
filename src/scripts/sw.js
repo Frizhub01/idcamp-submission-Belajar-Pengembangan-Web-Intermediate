@@ -1,6 +1,6 @@
 import { precacheAndRoute } from "workbox-precaching";
 import { registerRoute } from "workbox-routing";
-import { StaleWhileRevalidate } from "workbox-strategies";
+import { NetworkFirst } from 'workbox-strategies';
 import { CacheableResponsePlugin } from "workbox-cacheable-response";
 import { ExpirationPlugin } from "workbox-expiration";
 import { openDB } from 'idb';
@@ -9,16 +9,11 @@ precacheAndRoute(self.__WB_MANIFEST);
 
 registerRoute(
   ({ url }) => url.origin === 'https://story-api.dicoding.dev' && url.pathname.startsWith('/v1/stories'),
-  new StaleWhileRevalidate({
+  new NetworkFirst({
     cacheName: 'storydrop-api-cache',
     plugins: [
-      new CacheableResponsePlugin({
-        statuses: [0, 200],
-      }),
-      new ExpirationPlugin({
-        maxEntries: 50,
-        maxAgeSeconds: 30 * 24 * 60 * 60,
-      }),
+      new CacheableResponsePlugin({ statuses: [0, 200] }),
+      new ExpirationPlugin({ maxEntries: 50, maxAgeSeconds: 30 * 24 * 60 * 60 }),
     ],
   })
 );
@@ -58,20 +53,26 @@ self.addEventListener("notificationclick", (event) => {
     return;
   }
 
-  const urlToOpen = event.notification.data.url;
+  const notificationData = event.notification.data || {};
+  const targetUrl = notificationData.url || '/#/';
+  const absoluteUrl = new URL(targetUrl, self.location.origin).href;
 
   event.waitUntil(
     clients.matchAll({ type: "window", includeUncontrolled: true }).then((windowClients) => {
-      for (let i = 0; i < windowClients.length; i++) {
-        const client = windowClients[i];
-        if (client.url === urlToOpen && "focus" in client) {
-          return client.focus();
+      
+      if (windowClients.length > 0) {
+        let client = windowClients[0];
+        
+        if ('navigate' in client) {
+          client.navigate(absoluteUrl);
         }
+        return client.focus();
       }
+      
       if (clients.openWindow) {
-        return clients.openWindow(urlToOpen);
+        return clients.openWindow(absoluteUrl);
       }
-    }),
+    })
   );
 });
 
