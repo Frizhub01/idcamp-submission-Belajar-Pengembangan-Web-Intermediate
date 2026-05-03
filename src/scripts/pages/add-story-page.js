@@ -5,6 +5,7 @@ import "leaflet/dist/leaflet.css";
 import icon from "leaflet/dist/images/marker-icon.png";
 import iconShadow from "leaflet/dist/images/marker-shadow.png";
 import iconRetina from "leaflet/dist/images/marker-icon-2x.png";
+import StoryIdb from "../data/idb";
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -247,6 +248,33 @@ class AddStoryPage {
 
       if (!this.selectedFile) {
         Swal.fire({ icon: "warning", title: "Oops...", text: "Harap pilih gambar dari galeri atau ambil foto lewat kamera!" });
+        return;
+      }
+
+      if (!navigator.onLine) {
+        const token = StoryApi.getAccessToken(); 
+      
+        await StoryIdb.putOfflineStory({
+          description: desc,
+          photo: this.selectedFile,
+          lat: lat ? parseFloat(lat) : null,
+          lon: lon ? parseFloat(lon) : null,
+          token: token 
+        });
+
+        if ('serviceWorker' in navigator && 'SyncManager' in window) {
+          const registration = await navigator.serviceWorker.ready;
+          await registration.sync.register('sync-new-stories');
+        }
+
+        Swal.fire({
+          icon: "info",
+          title: "Mode Offline",
+          text: "Koneksi terputus. Cerita disimpan lokal dan akan diunggah otomatis saat online kembali."
+        }).then(() => {
+          window.location.hash = "#/";
+        });
+
         return;
       }
 

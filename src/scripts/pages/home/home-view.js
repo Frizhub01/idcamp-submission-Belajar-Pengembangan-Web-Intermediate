@@ -3,6 +3,7 @@ import "leaflet/dist/leaflet.css";
 import icon from "leaflet/dist/images/marker-icon.png";
 import iconShadow from "leaflet/dist/images/marker-shadow.png";
 import iconRetina from "leaflet/dist/images/marker-icon-2x.png";
+import StoryIdb from "../../data/idb";
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -15,6 +16,7 @@ class HomeView {
   constructor() {
     this.map = null;
     this.markers = [];
+    this.favoriteStoriesCache = [];
   }
 
   getTemplate() {
@@ -31,7 +33,17 @@ class HomeView {
           <div id="mapContainer" class="map-container" style="height: 400px;"></div>
         </div>
         <div class="list-section">
-          <h2>Daftar Cerita Terlihat (<span id="storyCount">0</span>)</h2>
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+            <h2>Daftar Cerita Terlihat (<span id="storyCount">0</span>)</h2>
+            <input type="search" id="searchStoryInput" placeholder="Cari pembuat cerita..." style="padding: 8px; border-radius: 6px; border: 1px solid #ccc; width: 100%; max-width: 250px;">
+          </div>
+          
+          <!-- TAMBAHAN: Tombol Filter -->
+          <div style="display: flex; gap: 10px; margin-bottom: 15px; margin-top: 10px;">
+            <button id="btnShowAll" style="padding: 8px 15px; border-radius: 6px; background: #007bff; color: white; border: none; cursor: pointer; font-weight: bold;">Semua Cerita</button>
+            <button id="btnShowFavorites" style="padding: 8px 15px; border-radius: 6px; background: #ff4757; color: white; border: none; cursor: pointer; font-weight: bold;">Lihat Favorit <i class="fas fa-heart"></i></button>
+          </div>
+          
           <div id="storiesContainer" class="stories-list">
             <p>Memuat data cerita...</p>
           </div>
@@ -97,7 +109,7 @@ class HomeView {
       .map((item) => item.data);
   }
 
-  showStories(stories) {
+  async showStories(stories) {
     const container = document.getElementById("storiesContainer");
     const countLabel = document.getElementById("storyCount");
 
@@ -107,17 +119,33 @@ class HomeView {
     container.innerHTML = "";
 
     if (stories.length === 0) {
-      container.innerHTML = '<p style="text-align:center; padding: 20px;">Tidak ada cerita di area peta ini.</p>';
+      container.innerHTML = '<p style="text-align:center; padding: 20px;">Tidak ada cerita di area peta ini atau tidak ditemukan.</p>';
       return;
+    }
+
+    try {
+        this.favoriteStoriesCache = await StoryIdb.getFavoriteStories() || [];
+    } catch(e) {
+        console.warn("Gagal memuat favorit", e);
     }
 
     stories.forEach((story) => {
       const shortDesc = story.description.length > 80 ? story.description.substring(0, 80) + "..." : story.description;
       const date = new Date(story.createdAt).toLocaleDateString("id-ID");
+      
+      const isFavorited = this.favoriteStoriesCache.some(fav => fav.id === story.id);
+      
+      const favoriteIcon = isFavorited ? '<i class="fas fa-heart" style="color: red;"></i>' : '<i class="far fa-heart"></i>';
 
       container.innerHTML += `
-        <article class="story-card" id="story-${story.id}" style="cursor: pointer;">
-          <img src="${story.photoUrl}" alt="Foto cerita oleh ${story.name}" class="story-img" crossorigin="anonymous">
+        <article class="story-card" id="story-${story.id}" style="cursor: pointer; position: relative;">
+          <img src="${story.photoUrl}" alt="Foto cerita oleh ${story.name}" class="story-img">
+          
+          <!-- TAMBAHAN: Tombol Favorit -->
+          <button class="btn-favorite" data-id="${story.id}" data-favorited="${isFavorited}" aria-label="Simpan ke Favorit" style="position: absolute; top: 10px; right: 10px; background: rgba(255,255,255,0.8); border: none; border-radius: 50%; width: 35px; height: 35px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">
+            ${favoriteIcon}
+          </button>
+
           <div class="story-info">
             <h3>${story.name}</h3> <span class="story-date">${date}</span>
             <p>${shortDesc}</p>
@@ -129,10 +157,62 @@ class HomeView {
     this._bindStoryCardEvents();
   }
 
+  initSearchListener(onSearchCallback) {
+    const searchInput = document.getElementById("searchStoryInput");
+    if (!searchInput) return;
+
+    searchInput.addEventListener("input", (e) => {
+      const query = e.target.value;
+      if (onSearchCallback) {
+        onSearchCallback(query);
+      }
+    });
+  }
+
+  initFavoriteButtons(onFavoriteActionCallback) {
+    const favoriteButtons = document.querySelectorAll(".btn-favorite");
+    
+    favoriteButtons.forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const currentBtn = e.currentTarget; 
+        const storyId = currentBtn.getAttribute("data-id");
+        const isFavorited = currentBtn.getAttribute("data-favorited") === "true";
+        
+        if (onFavoriteActionCallback) {
+           onFavoriteActionCallback(storyId, isFavorited ? 'delete' : 'add');
+        }
+      });
+    });
+  }
+
+  initFilterButtons(onShowAllCallback, onShowFavoritesCallback) {
+    const btnAll = document.getElementById("btnShowAll");
+    const btnFav = document.getElementById("btnShowFavorites");
+
+    if (btnAll) {
+      btnAll.addEventListener("click", () => {
+        if (onShowAllCallback) onShowAllCallback();
+      });
+    }
+
+    if (btnFav) {
+      btnFav.addEventListener("click", () => {
+        if (onShowFavoritesCallback) onShowFavoritesCallback();
+      });
+    }
+  }
+
   _bindStoryCardEvents() {
     const cards = document.querySelectorAll(".story-card");
     cards.forEach((card) => {
-      card.addEventListener("click", () => {
+      card.addEventListener("click", (e) => {
+        if (e.target.closest('.btn-favorite')) {
+          return; 
+        }
+
         const storyId = card.id.replace("story-", "");
         const targetItem = this.markers.find((item) => item.data.id === storyId);
 

@@ -3,8 +3,8 @@ import { registerRoute } from "workbox-routing";
 import { StaleWhileRevalidate } from "workbox-strategies";
 import { CacheableResponsePlugin } from "workbox-cacheable-response";
 import { ExpirationPlugin } from "workbox-expiration";
+import { openDB } from 'idb';
 
-// Precaching aset statis dari Webpack
 precacheAndRoute(self.__WB_MANIFEST);
 
 registerRoute(
@@ -17,24 +17,23 @@ registerRoute(
       }),
       new ExpirationPlugin({
         maxEntries: 50,
-        maxAgeSeconds: 30 * 24 * 60 * 60, // Cache disimpan selama 30 Hari
+        maxAgeSeconds: 30 * 24 * 60 * 60,
       }),
     ],
   })
 );
 
-// Event listener untuk menerima Push Notification
 self.addEventListener("push", (event) => {
   let notificationData = {
     title: "StoryDrop",
     options: {
       body: "Ada pembaruan cerita terbaru!",
-      icon: "/favicon.png", // Ganti dengan path logo yang sesuai
+      icon: "/favicon.png",
       actions: [
         { action: "explore", title: "Lihat Cerita" },
         { action: "close", title: "Tutup" },
       ],
-      data: { url: "/" }, // URL fallback
+      data: { url: "/" },
     },
   };
 
@@ -45,7 +44,6 @@ self.addEventListener("push", (event) => {
       notificationData.options.body = dataJson.body || notificationData.options.body;
       if (dataJson.url) notificationData.options.data.url = dataJson.url;
     } catch (error) {
-      // Fallback ke text jika payload bukan JSON
       notificationData.options.body = event.data.text();
     }
   }
@@ -53,7 +51,6 @@ self.addEventListener("push", (event) => {
   event.waitUntil(self.registration.showNotification(notificationData.title, notificationData.options));
 });
 
-// Event listener untuk interaksi action button pada notifikasi
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
 
@@ -77,3 +74,46 @@ self.addEventListener("notificationclick", (event) => {
     }),
   );
 });
+
+self.addEventListener('sync', (event) => {
+  if (event.tag === 'sync-new-stories') {
+    event.waitUntil(syncStoriesToServer());
+  }
+});
+
+async function syncStoriesToServer() {
+  const db = await openDB('storydrop-db', 1);
+  const offlineStories = await db.getAll('offline-stories');
+
+  for (const story of offlineStories) {
+    const formData = new FormData();
+    formData.append('description', story.description);
+    formData.append('photo', story.photo, 'capture.jpg');
+    
+    if (story.lat && story.lon) {
+      formData.append('lat', story.lat);
+      formData.append('lon', story.lon);
+    }
+
+    try {
+      const response = await fetch('https://story-api.dicoding.dev/v1/stories', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${story.token}`
+        },
+        body: formData
+      });
+
+      if (response.ok) {
+        await db.delete('offline-stories', story.id);
+      
+        self.registration.showNotification("StoryDrop", {
+          body: "Asyik! Cerita yang kamu buat saat offline sudah berhasil diunggah.",
+          icon: "/favicon.png"
+        });
+      }
+    } catch (error) {
+      console.error('Gagal sync cerita, akan dicoba lagi nanti:', error);
+    }
+  }
+}
