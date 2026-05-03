@@ -6,6 +6,7 @@ import '../styles/pages/home-page.css';
 import '../styles/pages/about-page.css';
 
 import App from './pages/app';
+import PushNotification from './utils/push-notification';
 
 document.addEventListener('DOMContentLoaded', async () => {
   const app = new App({
@@ -15,6 +16,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   await app.renderPage();
+  await PushNotification.init();
 
   window.addEventListener('hashchange', async () => {
     await app.renderPage();

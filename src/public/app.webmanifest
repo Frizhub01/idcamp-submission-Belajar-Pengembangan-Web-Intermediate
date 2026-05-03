@@ -1,0 +1,52 @@
+{
+  "name": "StoryDrop",
+  "short_name": "StoryDrop",
+  "description": "Platform berbagi cerita terbaik di sekitarmu.",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#89a8b2",
+  "icons": [
+    {
+      "src": "images/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "images/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "images/screenshot-desktop.png",
+      "sizes": "1366x768",
+      "type": "image/png",
+      "form_factor": "wide"
+    },
+    {
+      "src": "images/screenshot-mobile.png",
+      "sizes": "754x1634",
+      "type": "image/png",
+      "form_factor": "narrow"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Tambah Cerita Baru",
+      "short_name": "Tambah",
+      "description": "Bagikan cerita barumu hari ini",
+      "url": "/#/add-story",
+      "icons": [
+        {
+          "src": "images/logo.png",
+          "sizes": "1600x1600",
+          "purpose": "any"
+        }
+      ]
+    }
+  ]
+}
