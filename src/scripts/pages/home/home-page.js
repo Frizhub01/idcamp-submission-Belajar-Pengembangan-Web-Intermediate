@@ -42,12 +42,14 @@ class HomePage {
 
   showAllStories() {
     this.isShowingFavorites = false;
+    this.view.updateFilterUI(false);
     this.view.renderMarkers(this.allStories);
     this.onMapMoved();
   }
 
   async showFavoriteStories() {
     this.isShowingFavorites = true;
+    this.view.updateFilterUI(true);
     const favStories = await StoryIdb.getFavoriteStories();
 
     this.view.renderMarkers(favStories);
@@ -86,10 +88,8 @@ class HomePage {
       sourceData = await StoryIdb.getFavoriteStories();
     }
 
-    const filteredStories = sourceData.filter((story) => 
-      story.name.toLowerCase().includes(query.toLowerCase())
-    );
-    
+    const filteredStories = sourceData.filter((story) => story.name.toLowerCase().includes(query.toLowerCase()));
+
     this.view.renderMarkers(filteredStories);
     await this.view.showStories(filteredStories);
     this.attachFavoriteListener();

@@ -33,15 +33,21 @@ class HomeView {
           <div id="mapContainer" class="map-container" style="height: 400px;"></div>
         </div>
         <div class="list-section">
-          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <h2>Daftar Cerita Terlihat (<span id="storyCount">0</span>)</h2>
-            <input type="search" id="searchStoryInput" placeholder="Cari pembuat cerita..." style="padding: 8px; border-radius: 6px; border: 1px solid #ccc; width: 100%; max-width: 250px;">
-          </div>
           
-          <!-- TAMBAHAN: Tombol Filter -->
-          <div style="display: flex; gap: 10px; margin-bottom: 15px; margin-top: 10px;">
-            <button id="btnShowAll" style="padding: 8px 15px; border-radius: 6px; background: #007bff; color: white; border: none; cursor: pointer; font-weight: bold;">Semua Cerita</button>
-            <button id="btnShowFavorites" style="padding: 8px 15px; border-radius: 6px; background: #ff4757; color: white; border: none; cursor: pointer; font-weight: bold;">Lihat Favorit <i class="fas fa-heart"></i></button>
+          <div class="list-header-sticky">
+            <div class="list-header-title">
+              <h2 id="listTitleText">Daftar Cerita Terlihat</h2>
+              <h2>(<span id="storyCount">0</span>)</h2>
+            </div>
+            
+            <div class="list-header-controls">
+              <input type="search" id="searchStoryInput" class="search-input" placeholder="Cari pembuat cerita...">
+              <div class="filter-buttons">
+                <!-- Tambahkan class 'btn-filter' dan 'active' bawaan -->
+                <button id="btnShowAll" class="btn-filter active">Semua Cerita</button>
+                <button id="btnShowFavorites" class="btn-filter">Lihat Favorit <i class="fas fa-heart"></i></button>
+              </div>
+            </div>
           </div>
           
           <div id="storiesContainer" class="stories-list">
@@ -202,6 +208,24 @@ class HomeView {
       btnFav.addEventListener("click", () => {
         if (onShowFavoritesCallback) onShowFavoritesCallback();
       });
+    }
+  }
+
+  updateFilterUI(isFavorites) {
+    const btnAll = document.getElementById("btnShowAll");
+    const btnFav = document.getElementById("btnShowFavorites");
+    const titleText = document.getElementById("listTitleText");
+
+    if (!btnAll || !btnFav || !titleText) return;
+
+    if (isFavorites) {
+      btnFav.classList.add("active");
+      btnAll.classList.remove("active");
+      titleText.innerText = "Cerita Favorit";
+    } else {
+      btnAll.classList.add("active");
+      btnFav.classList.remove("active");
+      titleText.innerText = "Daftar Cerita Terlihat";
     }
   }
 

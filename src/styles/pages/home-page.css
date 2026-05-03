@@ -14,6 +14,9 @@
   position: relative;
 }
 
+/* =========================================
+   Peta (Map Section)
+   ========================================= */
 .map-container {
   height: 400px;
   width: 100%;
@@ -24,7 +27,79 @@
   overflow: hidden;
 }
 
-/* Daftar Cerita (Cards) */
+/* =========================================
+   Kontainer Daftar Cerita & Kontrol (Sticky)
+   ========================================= */
+.list-header-sticky {
+  position: sticky;
+  top: 70px; 
+  z-index: 10;
+  background-color: #f1f0e8; 
+  padding: 10px 0 15px 0;
+  border-bottom: 2px solid rgba(0,0,0,0.05);
+  margin-bottom: 15px;
+}
+
+.list-header-title {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 10px;
+}
+
+.list-header-title h2 {
+  margin: 0;
+  font-size: 1.3rem;
+  color: #333;
+}
+
+.list-header-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.search-input {
+  padding: 10px 15px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  width: 100%;
+  font-size: 14px;
+}
+
+.filter-buttons {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+}
+
+.btn-filter {
+  flex: 1; 
+  padding: 10px;
+  border-radius: 8px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.3s ease;
+  background-color: #ddd; 
+  color: #666;
+}
+
+#btnShowAll.active {
+  background-color: #007bff;
+  color: white;
+  box-shadow: 0 4px 6px rgba(0, 123, 255, 0.3);
+}
+
+#btnShowFavorites.active {
+  background-color: #ff4757;
+  color: white;
+  box-shadow: 0 4px 6px rgba(255, 71, 87, 0.3);
+}
+
+/* =========================================
+   Daftar Cerita (Cards)
+   ========================================= */
 .stories-list {
   display: flex;
   flex-direction: column;
@@ -74,7 +149,9 @@
   font-weight: 500;
 }
 
-/* Tombol Floating Action Button (FAB) */
+/* =========================================
+   Tombol Floating Action Button (FAB)
+   ========================================= */
 .fab-btn {
   position: fixed;
   bottom: 30px;
@@ -100,7 +177,9 @@
   box-shadow: 0 15px 30px rgba(116, 141, 174, 0.4);
 }
 
-/* Media Queries */
+/* =========================================
+   Media Queries (Tablet & Desktop)
+   ========================================= */
 @media screen and (min-width: 768px) {
   .story-card {
     flex-direction: row;
@@ -108,6 +187,31 @@
   .story-img {
     width: 250px;
     height: auto;
+  }
+  
+  .list-header-controls {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+  
+  .search-input {
+    max-width: 250px;
+  }
+  
+  .filter-buttons {
+    flex: unset; 
+  }
+  
+  .btn-filter {
+    flex: unset;
+    min-width: 130px;
+  }
+}
+
+@media screen and (min-width: 992px) {
+  .list-header-sticky {
+    top: 0;
   }
 }
 
