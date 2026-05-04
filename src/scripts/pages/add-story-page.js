@@ -23,7 +23,7 @@ class AddStoryPage {
           
           <div class="form-group" style="display: flex; flex-direction: column; gap: 8px;">
             <label for="descInput" style="font-weight: bold;">Deskripsi</label>
-            <textarea id="descInput" placeholder="Ceritakan momenmu..." required style="min-height: 100px; padding: 10px; border-radius: 8px; border: 1px solid #ccc;"></textarea>
+            <textarea id="descInput" placeholder="Ceritakan momenmu..." required aria-describedby="charCounter" style="min-height: 100px; padding: 10px; border-radius: 8px; border: 1px solid #ccc;"></textarea>
             <small id="charCounter" style="color: #666;">0 / 500 karakter</small>
           </div>
 
@@ -88,7 +88,7 @@ class AddStoryPage {
           },
           () => {
             console.log("GPS akses ditolak/gagal.");
-          }
+          },
         );
       }
 
@@ -252,25 +252,25 @@ class AddStoryPage {
       }
 
       if (!navigator.onLine) {
-        const token = StoryApi.getAccessToken(); 
-      
+        const token = StoryApi.getAccessToken();
+
         await StoryIdb.putOfflineStory({
           description: desc,
           photo: this.selectedFile,
           lat: lat ? parseFloat(lat) : null,
           lon: lon ? parseFloat(lon) : null,
-          token: token 
+          token: token,
         });
 
-        if ('serviceWorker' in navigator && 'SyncManager' in window) {
+        if ("serviceWorker" in navigator && "SyncManager" in window) {
           const registration = await navigator.serviceWorker.ready;
-          await registration.sync.register('sync-new-stories');
+          await registration.sync.register("sync-new-stories");
         }
 
         Swal.fire({
           icon: "info",
           title: "Mode Offline",
-          text: "Koneksi terputus. Cerita disimpan lokal dan akan diunggah otomatis saat online kembali."
+          text: "Koneksi terputus. Cerita disimpan lokal dan akan diunggah otomatis saat online kembali.",
         }).then(() => {
           window.location.hash = "#/";
         });
