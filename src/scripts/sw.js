@@ -1,3 +1,5 @@
+/* global clients */
+
 import { precacheAndRoute } from "workbox-precaching";
 import { registerRoute } from "workbox-routing";
 import { NetworkFirst } from 'workbox-strategies';
@@ -39,6 +41,7 @@ self.addEventListener("push", (event) => {
       notificationData.options.body = dataJson.body || notificationData.options.body;
       if (dataJson.url) notificationData.options.data.url = dataJson.url;
     } catch (error) {
+      console.error('Gagal memproses data push:', error);
       notificationData.options.body = event.data.text();
     }
   }

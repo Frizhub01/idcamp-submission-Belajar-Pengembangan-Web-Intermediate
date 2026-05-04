@@ -60,6 +60,7 @@ class RegisterPage {
           });
         }
       } catch (err) {
+        console.error(err);
         Swal.close();
         errorEl.innerText = 'Terjadi kesalahan jaringan.';
       }

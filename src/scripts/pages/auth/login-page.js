@@ -54,6 +54,7 @@ class LoginPage {
           });
         }
       } catch (err) {
+        console.error(err);
         Swal.fire({ icon: 'error', title: 'Oops...', text: 'Gagal terhubung ke server.' });
       }
     });

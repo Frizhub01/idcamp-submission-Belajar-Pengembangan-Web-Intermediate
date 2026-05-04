@@ -1,22 +1,22 @@
-const BASE_URL = 'https://story-api.dicoding.dev/v1';
+const BASE_URL = "https://story-api.dicoding.dev/v1";
 
 class StoryApi {
   static getAccessToken() {
-    return localStorage.getItem('token');
+    return localStorage.getItem("token");
   }
 
   static _checkAuth(response) {
     if (response.status === 401) {
-      localStorage.removeItem('token');
-      window.location.hash = '#/login';
-      throw new Error('Sesi Anda telah berakhir. Silakan login kembali.');
+      localStorage.removeItem("token");
+      window.location.hash = "#/login";
+      throw new Error("Sesi Anda telah berakhir. Silakan login kembali.");
     }
   }
 
   static async register({ name, email, password }) {
     const response = await fetch(`${BASE_URL}/register`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name, email, password }),
     });
     return response.json();
@@ -24,8 +24,8 @@ class StoryApi {
 
   static async login({ email, password }) {
     const response = await fetch(`${BASE_URL}/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
     });
     return response.json();
@@ -34,78 +34,78 @@ class StoryApi {
   static async getStoriesWithLocation() {
     try {
       const response = await fetch(`${BASE_URL}/stories?location=1`, {
-        method: 'GET',
+        method: "GET",
         headers: {
           Authorization: `Bearer ${this.getAccessToken()}`,
         },
       });
-      
+
       this._checkAuth(response);
 
       const responseJson = await response.json();
-      
+
       if (!responseJson.error) {
-        return responseJson.listStory || []; 
+        return responseJson.listStory || [];
       } else {
         throw new Error(responseJson.message);
       }
     } catch (error) {
       console.error('Gagal mengambil data cerita:', error);
-      throw new Error(error.message || 'Gagal terhubung ke jaringan. Periksa koneksi internet Anda.'); 
+      throw new Error(error.message || 'Gagal terhubung ke jaringan. Periksa koneksi internet Anda.', { cause: error }); 
     }
   }
 
   static async addStory({ description, photo, lat, lon }) {
     const data = new FormData();
-    data.append('description', description);
-    data.append('photo', photo);
-    
+    data.append("description", description);
+    data.append("photo", photo);
+
     if (lat && lon) {
-      data.append('lat', lat);
-      data.append('lon', lon);
+      data.append("lat", lat);
+      data.append("lon", lon);
     }
 
     try {
       const response = await fetch(`${BASE_URL}/stories`, {
-        method: 'POST',
+        method: "POST",
         headers: {
           Authorization: `Bearer ${this.getAccessToken()}`,
         },
         body: data,
       });
-      
+
       this._checkAuth(response);
 
       return await response.json();
     } catch (error) {
-      return { error: true, message: error.message || 'Gagal terhubung ke jaringan' };
+      return { error: true, message: error.message || "Gagal terhubung ke jaringan" };
     }
   }
 
   static async subscribePushNotification(subscription) {
     const response = await fetch(`${BASE_URL}/notifications/subscribe`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
         Authorization: `Bearer ${this.getAccessToken()}`,
       },
-      body: JSON.stringify(subscription), 
+      body: JSON.stringify(subscription),
     });
-    
+
     this._checkAuth(response);
     return await response.json();
   }
 
   static async unsubscribePushNotification(endpoint) {
     const response = await fetch(`${BASE_URL}/notifications/subscribe`, {
-      method: 'DELETE',
+      method: "DELETE",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
         Authorization: `Bearer ${this.getAccessToken()}`,
       },
       body: JSON.stringify({ endpoint }),
     });
-    
+
     this._checkAuth(response);
     return await response.json();
   }

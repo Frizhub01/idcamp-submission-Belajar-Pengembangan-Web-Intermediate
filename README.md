@@ -1,68 +1,92 @@
-# App Starter Project with Webpack
+# StoryDrop App
 
-Proyek ini adalah setup dasar untuk aplikasi web yang menggunakan webpack untuk proses bundling, Babel untuk transpile JavaScript, serta mendukung proses build dan serving aplikasi.
+StoryDrop adalah aplikasi web *Single-Page Application* (SPA) berbasis Progressive Web App (PWA) yang memungkinkan pengguna untuk membagikan cerita momen mereka beserta lokasi peta. Proyek ini dibangun menggunakan Webpack, Leaflet.js untuk pemetaan, serta memanfaatkan IndexedDB dan Background Sync untuk dukungan fitur *offline*.
 
 ## Table of Contents
 
+- [Features](#features)
 - [Getting Started](#getting-started)
 - [Scripts](#scripts)
 - [Project Structure](#project-structure)
+
+## Features
+
+- **Single-Page Application (SPA):** Transisi halaman yang mulus tanpa *reload*.
+- **Peta Interaktif:** Integrasi dengan Leaflet.js untuk menampilkan dan menentukan titik lokasi cerita.
+- **PWA & Offline Support:** Mendukung instalasi aplikasi (Add to Home Screen) dan dapat digunakan saat luring berkat Service Worker dan Cache API.
+- **IndexedDB:** Menyimpan data cerita dan cerita favorit secara lokal.
+- **Background Sync:** Cerita yang dibuat saat *offline* akan otomatis diunggah ketika koneksi internet kembali *online*.
+- **Push Notification:** Menerima pemberitahuan ketika ada pembaruan cerita terbaru.
 
 ## Getting Started
 
 ### Prerequisites
 
-- [Node.js](https://nodejs.org/) (disarankan versi 12 atau lebih tinggi)
+- [Node.js](https://nodejs.org/) (disarankan versi 14 atau lebih tinggi)
 - [npm](https://www.npmjs.com/) (Node package manager)
 
 ### Installation
 
-1. Download starter project [di sini](https://raw.githubusercontent.com/dicodingacademy/a219-web-intermediate-labs/099-shared-files/starter-project-with-webpack.zip).
-2. Lakukan unzip file.
-3. Pasang seluruh dependencies dengan perintah berikut.
+1. *Clone* repositori ini atau *download* kode sumbernya.
+2. Buka terminal dan arahkan ke direktori proyek.
+3. Pasang seluruh *dependencies* dengan perintah berikut:
    ```shell
    npm install
    ```
 
 ## Scripts
 
-- Build for Production:
-  ```shell
-  npm run build
-  ```
-  Script ini menjalankan webpack dalam mode production menggunakan konfigurasi `webpack.prod.js` dan menghasilkan sejumlah file build ke direktori `dist`.
-
-- Start Development Server:
+- **Start Development Server:**
   ```shell
   npm run start-dev
   ```
-  Script ini menjalankan server pengembangan webpack dengan fitur live reload dan mode development sesuai konfigurasi di`webpack.dev.js`.
+  Script ini menjalankan server pengembangan Webpack dengan fitur *live reload* dan mode *development* sesuai konfigurasi di `webpack.dev.js`. *(Catatan: Service Worker dimatikan pada mode ini).*
 
-- Serve:
+- **Build for Production:**
+  ```shell
+  npm run build
+  
+  ```
+  Script ini menjalankan Webpack dalam mode *production* menggunakan konfigurasi `webpack.prod.js` dan menghasilkan sejumlah file *build* (termasuk *Service Worker*) ke direktori `dist`.
+
+- **Serve Production Build:**
   ```shell
   npm run serve
   ```
-  Script ini menggunakan [`http-server`](https://www.npmjs.com/package/http-server) untuk menyajikan konten dari direktori `dist`.
+  Script ini menggunakan `http-server` (atau server statis serupa) untuk menyajikan konten dari direktori `dist`. Gunakan perintah ini untuk menguji fitur PWA dan *Offline Mode*.
 
 ## Project Structure
 
-Proyek starter ini dirancang agar kode tetap modular dan terorganisir.
-
+Proyek ini dirancang secara modular agar kode tetap bersih dan mudah dipelihara.
 ```text
-starter-project/
-├── dist/                   # Compiled files for production
+storydrop/
+├── dist/                   # Compiled files for production (hasil build)
 ├── src/                    # Source project files
-│   ├── public/             # Public files
+│   ├── public/             # Public assets
+│   │   ├── images/         # Ikon dan gambar statis
+│   │   ├── app.webmanifest # Konfigurasi PWA Manifest
+│   │   └── favicon.png     # Favicon aplikasi
 │   ├── scripts/            # Source JavaScript files
-│   │   └── index.js        # Main JavaScript entry file
+│   │   ├── data/           # Konfigurasi API (api.js) dan IndexedDB (idb.js)
+│   │   ├── pages/          # Komponen halaman (Home, Add Story, Auth, dll)
+│   │   ├── routes/         # Logika routing SPA (routes.js, url-parser.js)
+│   │   ├── utils/          # Fungsi utilitas (Push Notification)
+│   │   ├── index.js        # Main JavaScript entry file
+│   │   └── sw.js           # Konfigurasi Service Worker (Workbox & Background Sync)
 │   ├── styles/             # Source CSS files
-│   │   └── styles.css      # Main CSS file
-│   └── index.html/         # Main HTML file
+│   │   ├── components/     # CSS khusus untuk komponen (modal, navbar)
+│   │   ├── pages/          # CSS khusus untuk halaman tertentu
+│   │   ├── base.css        # CSS dasar/reset
+│   │   └── variables.css   # Variabel warna dan ukuran CSS
+│   └── index.html          # Main HTML file
 ├── package.json            # Project metadata and dependencies
-├── package-lock.json       # Project metadata and dependencies
+├── package-lock.json       # Lockfile dependencies
+├── eslint.config.mjs       # Konfigurasi ESLint (Linter)
 ├── README.md               # Project documentation
-├── STUDENT.txt             # Student information
+├── STUDENT.txt             # Informasi siswa dan URL Deployment
 ├── webpack.common.js       # Webpack common configuration
 ├── webpack.dev.js          # Webpack development configuration
 └── webpack.prod.js         # Webpack production configuration
+```
+
 ```
