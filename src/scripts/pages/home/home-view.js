@@ -41,9 +41,10 @@ class HomeView {
             </div>
             
             <div class="list-header-controls">
+              <label for="searchStoryInput" class="visually-hidden">Cari pembuat cerita</label>
               <input type="search" id="searchStoryInput" class="search-input" placeholder="Cari pembuat cerita...">
+              
               <div class="filter-buttons">
-                <!-- Tambahkan class 'btn-filter' dan 'active' bawaan -->
                 <button id="btnShowAll" class="btn-filter active">Semua Cerita</button>
                 <button id="btnShowFavorites" class="btn-filter">Lihat Favorit <i class="fas fa-heart"></i></button>
               </div>
