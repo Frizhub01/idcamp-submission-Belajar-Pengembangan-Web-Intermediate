@@ -89,17 +89,17 @@ class App {
       window.cameraStream = null;
     }
 
-    const url = getActiveRoute();
+    let url = getActiveRoute();
     const token = localStorage.getItem('token');
 
     if (token && (url === '/login' || url === '/register')) {
-      window.location.hash = '#/';
-      return;
+      window.history.replaceState(null, null, '#/'); 
+      url = '/';
     }
 
     if (!token && (url !== '/login' && url !== '/register')) {
-      window.location.hash = '#/login';
-      return;
+      window.history.replaceState(null, null, '#/login');
+      url = '/login'; 
     }
 
     const PageClass = routes[url];
